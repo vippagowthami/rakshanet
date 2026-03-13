@@ -28,10 +28,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY
 SECRET_KEY = os.environ.get('SECRET_KEY', 'change-me-in-production')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+render_external_hostname = os.environ.get('RENDER_EXTERNAL_HOSTNAME', '').strip()
+default_allowed_hosts = ['localhost', '127.0.0.1', '.onrender.com']
+if render_external_hostname:
+    default_allowed_hosts.append(render_external_hostname)
+
+allowed_hosts_env = os.environ.get('ALLOWED_HOSTS')
 ALLOWED_HOSTS = (
-    os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,rakshanet.onrender.com').split(',')
-    if os.environ.get('ALLOWED_HOSTS')
-    else ['localhost', '127.0.0.1', 'rakshanet.onrender.com']
+    [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]
+    if allowed_hosts_env
+    else default_allowed_hosts
 )
 
 if not DEBUG and SECRET_KEY == 'change-me-in-production':
@@ -40,8 +46,12 @@ if not DEBUG and SECRET_KEY == 'change-me-in-production':
 # CSRF Configuration
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     'CSRF_TRUSTED_ORIGINS',
-    'http://localhost:8000,http://127.0.0.1:8000,https://rakshanet.onrender.com'
+    'http://localhost:8000,http://127.0.0.1:8000,https://*.onrender.com'
 ).split(',')
+if render_external_hostname:
+    render_origin = f'https://{render_external_hostname}'
+    if render_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(render_origin)
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = (not DEBUG) or (os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True')
 SESSION_COOKIE_SECURE = (not DEBUG) or (os.environ.get('SESSION_COOKIE_SECURE', 'False') == 'True')
