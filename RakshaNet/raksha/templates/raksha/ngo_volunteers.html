@@ -1,0 +1,177 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Manage Volunteers" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-users"></i> {% trans "Manage Volunteers" %}</h2>
+                <a href="{% url 'ngo-dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                </a>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-users"></i> {% trans "Total Volunteers" %}</h5>
+                            <h2 class="mb-0">{{ total_volunteers }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-check-circle"></i> {% trans "Available" %}</h5>
+                            <h2 class="mb-0">{{ available_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-clock"></i> {% trans "Total Hours" %}</h5>
+                            <h2 class="mb-0">{{ total_hours }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Volunteers List -->
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">{% trans "Volunteer List" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% if volunteers %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "Name" %}</th>
+                                        <th>{% trans "Username" %}</th>
+                                        <th>{% trans "Skills" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "Hours Volunteered" %}</th>
+                                        <th>{% trans "Joined" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for volunteer in volunteers %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ volunteer.user.get_full_name|default:volunteer.user.username }}</strong>
+                                            </td>
+                                            <td>{{ volunteer.user.username }}</td>
+                                            <td>
+                                                {% if volunteer.skills %}
+                                                    <small class="text-muted">{{ volunteer.skills|truncatechars:50 }}</small>
+                                                {% else %}
+                                                    <small class="text-muted">{% trans "No skills listed" %}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if volunteer.available %}
+                                                    <span class="badge badge-success">{% trans "Available" %}</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary">{% trans "Unavailable" %}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-info">{{ volunteer.total_hours_volunteered|default:0 }}h</span>
+                                            </td>
+                                            <td>
+                                                <small>{{ volunteer.created_at|date:"M d, Y" }}</small>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info" 
+                                                        data-toggle="modal" 
+                                                        data-target="#volunteerModal{{ volunteer.id }}">
+                                                    <i class="fas fa-eye"></i> {% trans "View" %}
+                                                </button>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Volunteer Detail Modal -->
+                                        <div class="modal fade" id="volunteerModal{{ volunteer.id }}" 
+                                             tabindex="-1" role="dialog" 
+                                             aria-labelledby="volunteerModalLabel{{ volunteer.id }}" 
+                                             aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="volunteerModalLabel{{ volunteer.id }}">
+                                                            {% trans "Volunteer Details" %}
+                                                        </h5>
+                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <p><strong>{% trans "Full Name:" %}</strong> {{ volunteer.user.get_full_name|default:volunteer.user.username }}</p>
+                                                                <p><strong>{% trans "Email:" %}</strong> {{ volunteer.user.email }}</p>
+                                                                <p><strong>{% trans "Phone:" %}</strong> {{ volunteer.phone_number|default:"N/A" }}</p>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <p><strong>{% trans "Available:" %}</strong> 
+                                                                    {% if volunteer.available %}
+                                                                        <span class="badge badge-success">{% trans "Yes" %}</span>
+                                                                    {% else %}
+                                                                        <span class="badge badge-secondary">{% trans "No" %}</span>
+                                                                    {% endif %}
+                                                                </p>
+                                                                <p><strong>{% trans "Hours Volunteered:" %}</strong> {{ volunteer.total_hours_volunteered|default:0 }}</p>
+                                                                <p><strong>{% trans "Joined:" %}</strong> {{ volunteer.created_at|date:"F d, Y" }}</p>
+                                                            </div>
+                                                        </div>
+                                                        <hr>
+                                                        <div class="row">
+                                                            <div class="col-12">
+                                                                <p><strong>{% trans "Skills:" %}</strong></p>
+                                                                <p>{{ volunteer.skills|default:"No skills listed" }}</p>
+                                                                <p><strong>{% trans "Experience:" %}</strong></p>
+                                                                <p>{{ volunteer.experience|default:"No experience listed" }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans "Close" %}</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> {% trans "No volunteers found for your organization." %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

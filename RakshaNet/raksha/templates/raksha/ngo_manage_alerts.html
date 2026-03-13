@@ -1,0 +1,255 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Manage Alerts" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-exclamation-triangle"></i> {% trans "Manage Emergency Alerts" %}</h2>
+                <div>
+                    <a href="{% url 'ngo-create-alert' %}" class="btn btn-danger mr-2">
+                        <i class="fas fa-plus"></i> {% trans "Create New Alert" %}
+                    </a>
+                    <a href="{% url 'ngo-dashboard' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                    </a>
+                </div>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Alerts List -->
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> {% trans "Your Emergency Alerts" %}
+                        <span class="badge badge-light ml-2">{{ alerts.paginator.count }} {% trans "Total" %}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if alerts %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "ID" %}</th>
+                                        <th>{% trans "Title" %}</th>
+                                        <th>{% trans "Disaster Type" %}</th>
+                                        <th>{% trans "Severity" %}</th>
+                                        <th>{% trans "Affected Area" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "Created" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for alert in alerts %}
+                                        <tr>
+                                            <td><strong>#{{ alert.id }}</strong></td>
+                                            <td>
+                                                <strong>{{ alert.title }}</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-secondary">
+                                                    {{ alert.disaster_type.name }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                {% if alert.severity == 'critical' %}
+                                                    <span class="badge badge-danger">{% trans "Critical" %}</span>
+                                                {% elif alert.severity == 'high' %}
+                                                    <span class="badge badge-warning">{% trans "High" %}</span>
+                                                {% elif alert.severity == 'medium' %}
+                                                    <span class="badge badge-info">{% trans "Medium" %}</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary">{% trans "Low" %}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-map-marker-alt"></i> {{ alert.affected_area|truncatechars:30 }}
+                                            </td>
+                                            <td>
+                                                {% if alert.active %}
+                                                    <span class="badge badge-success">{% trans "Active" %}</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary">{% trans "Inactive" %}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small>{{ alert.created_at|date:"M d, Y H:i" }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    <button class="btn btn-info" 
+                                                            data-toggle="modal" 
+                                                            data-target="#alertModal{{ alert.id }}">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    <a href="{% url 'ngo-edit-alert' alert.id %}" class="btn btn-warning">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                                     <a href="{% url 'ngo-deactivate-alert' alert.id %}" 
+                                                       class="btn btn-danger" 
+                                                                         onclick="return confirm('{% trans "Are you sure you want to deactivate this alert?" %}')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <!-- Alert Detail Modal -->
+                                        <div class="modal fade" id="alertModal{{ alert.id }}" 
+                                             tabindex="-1" role="dialog" 
+                                             aria-labelledby="alertModalLabel{{ alert.id }}" 
+                                             aria-hidden="true">
+                                            <div class="modal-dialog modal-lg" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-{% if alert.severity == 'critical' %}danger{% elif alert.severity == 'high' %}warning{% else %}info{% endif %} text-white">
+                                                        <h5 class="modal-title" id="alertModalLabel{{ alert.id }}">
+                                                            <i class="fas fa-exclamation-triangle"></i> {{ alert.title }}
+                                                        </h5>
+                                                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="row mb-3">
+                                                            <div class="col-md-6">
+                                                                <p><strong>{% trans "Disaster Type:" %}</strong></p>
+                                                                <p>{{ alert.disaster_type.name }}</p>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <p><strong>{% trans "Severity:" %}</strong></p>
+                                                                <p>
+                                                                    {% if alert.severity == 'critical' %}
+                                                                        <span class="badge badge-danger">{% trans "Critical" %}</span>
+                                                                    {% elif alert.severity == 'high' %}
+                                                                        <span class="badge badge-warning">{% trans "High" %}</span>
+                                                                    {% elif alert.severity == 'medium' %}
+                                                                        <span class="badge badge-info">{% trans "Medium" %}</span>
+                                                                    {% else %}
+                                                                        <span class="badge badge-secondary">{% trans "Low" %}</span>
+                                                                    {% endif %}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row mb-3">
+                                                            <div class="col-12">
+                                                                <p><strong>{% trans "Message:" %}</strong></p>
+                                                                <div class="alert alert-light">
+                                                                    {{ alert.message }}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row mb-3">
+                                                            <div class="col-12">
+                                                                <p><strong>{% trans "Affected Area:" %}</strong></p>
+                                                                <p><i class="fas fa-map-marker-alt"></i> {{ alert.affected_area }}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        {% if alert.latitude and alert.longitude %}
+                                                            <div class="row mb-3">
+                                                                <div class="col-md-6">
+                                                                    <p><strong>{% trans "Latitude:" %}</strong> {{ alert.latitude }}</p>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <p><strong>{% trans "Longitude:" %}</strong> {{ alert.longitude }}</p>
+                                                                </div>
+                                                            </div>
+                                                        {% endif %}
+
+
+
+                                                        <hr>
+
+                                                        <div class="row">
+                                                            <div class="col-md-6">
+                                                                <p><strong>{% trans "Status:" %}</strong></p>
+                                                                <p>
+                                                                    {% if alert.active %}
+                                                                        <span class="badge badge-success">{% trans "Active" %}</span>
+                                                                    {% else %}
+                                                                        <span class="badge badge-secondary">{% trans "Inactive" %}</span>
+                                                                    {% endif %}
+                                                                </p>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <p><strong>{% trans "Created:" %}</strong></p>
+                                                                <p>{{ alert.created_at|date:"F d, Y H:i" }}</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <a href="{% url 'ngo-edit-alert' alert.id %}" class="btn btn-warning">
+                                                            <i class="fas fa-edit"></i> {% trans "Edit" %}
+                                                        </a>
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                            {% trans "Close" %}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if alerts.has_other_pages %}
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    {% if alerts.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1">{% trans "First" %}</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ alerts.previous_page_number }}">{% trans "Previous" %}</a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item active">
+                                        <span class="page-link">
+                                            {% trans "Page" %} {{ alerts.number }} {% trans "of" %} {{ alerts.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if alerts.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ alerts.next_page_number }}">{% trans "Next" %}</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ alerts.paginator.num_pages }}">{% trans "Last" %}</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> {% trans "No alerts found." %}
+                            <a href="{% url 'ngo-create-alert' %}" class="alert-link">{% trans "Create your first alert" %}</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

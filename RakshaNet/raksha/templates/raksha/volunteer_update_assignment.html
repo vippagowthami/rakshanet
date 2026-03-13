@@ -1,0 +1,201 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Update Assignment" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-edit"></i> {% trans "Update Assignment Status" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Current Assignment Info -->
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle"></i> {% trans "Assignment Information" %}</h5>
+                        <p><strong>{% trans "Request ID:" %}</strong> #{{ assignment.request.id }}</p>
+                        <p><strong>{% trans "Crisis:" %}</strong> {{ assignment.request.disaster_type.name|default:"Emergency" }}</p>
+                        <p><strong>{% trans "Location:" %}</strong> {{ assignment.request.address|default:"Not specified" }}</p>
+                        <p><strong>{% trans "Current Status:" %}</strong>
+                            {% if assignment.status == 'pending' %}
+                                <span class="badge badge-warning">{% trans "Pending" %}</span>
+                            {% elif assignment.status == 'accepted' %}
+                                <span class="badge badge-info">{% trans "Accepted" %}</span>
+                            {% elif assignment.status == 'in_progress' %}
+                                <span class="badge badge-primary">{% trans "In Progress" %}</span>
+                            {% elif assignment.status == 'completed' %}
+                                <span class="badge badge-success">{% trans "Completed" %}</span>
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <form method="post" id="updateAssignmentForm">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="{{ form.status.id_for_label }}">
+                                {{ form.status.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.status }}
+                            {% if form.status.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.status.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.status.help_text }}</small>
+                        </div>
+
+                        <div class="form-group" id="hoursSpentGroup">
+                            <label for="{{ form.hours_spent.id_for_label }}">
+                                {{ form.hours_spent.label }}
+                            </label>
+                            {{ form.hours_spent }}
+                            {% if form.hours_spent.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.hours_spent.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.hours_spent.help_text }}</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.notes.id_for_label }}">
+                                {{ form.notes.label }}
+                            </label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.notes.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.notes.help_text }}</small>
+                        </div>
+
+                        <!-- Status-specific instructions -->
+                        <div id="statusInstructions" class="alert alert-warning" style="display: none;">
+                            <strong><i class="fas fa-lightbulb"></i> {% trans "Note:" %}</strong>
+                            <p id="instructionText"></p>
+                        </div>
+
+                        <hr>
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> {% trans "Update Assignment" %}
+                            </button>
+                            <a href="{% url 'volunteer-assignment-details' assignment.id %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> {% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Guidelines Card -->
+            <div class="card mt-3 border-info">
+                <div class="card-body">
+                    <h5 class="text-info"><i class="fas fa-info-circle"></i> {% trans "Status Update Guidelines" %}</h5>
+                    <ul class="mb-0">
+                        <li><strong>{% trans "Accepted:" %}</strong> {% trans "You have accepted the assignment and preparing to start" %}</li>
+                        <li><strong>{% trans "In Progress:" %}</strong> {% trans "You are actively working on this assignment" %}</li>
+                        <li><strong>{% trans "Completed:" %}</strong> {% trans "You have finished all tasks. Please provide hours spent." %}</li>
+                        <li><strong>{% trans "Cancelled:" %}</strong> {% trans "Assignment cannot be completed. Provide reason in notes." %}</li>
+                    </ul>
+                    <div class="alert alert-warning mt-3 mb-0">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>{% trans "Important:" %}</strong>
+                        {% trans "Always update the status and add notes about your progress. This helps the NGO track the crisis resolution." %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Tracker -->
+            <div class="card mt-3 border-success">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-tasks"></i> {% trans "Assignment Progress" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="progress" style="height: 30px;">
+                        {% if assignment.status == 'pending' %}
+                            <div class="progress-bar bg-warning" style="width: 25%">25% - {% trans "Pending" %}</div>
+                        {% elif assignment.status == 'accepted' %}
+                            <div class="progress-bar bg-info" style="width: 50%">50% - {% trans "Accepted" %}</div>
+                        {% elif assignment.status == 'in_progress' %}
+                            <div class="progress-bar bg-primary" style="width: 75%">75% - {% trans "In Progress" %}</div>
+                        {% elif assignment.status == 'completed' %}
+                            <div class="progress-bar bg-success" style="width: 100%">100% - {% trans "Completed" %}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-3">
+                        <p><strong>{% trans "Assigned:" %}</strong> {{ assignment.assigned_at|date:"M d, Y H:i" }}</p>
+                        {% if assignment.started_at %}
+                            <p><strong>{% trans "Started:" %}</strong> {{ assignment.started_at|date:"M d, Y H:i" }}</p>
+                        {% endif %}
+                        {% if assignment.completed_at %}
+                            <p><strong>{% trans "Completed:" %}</strong> {{ assignment.completed_at|date:"M d, Y H:i" }}</p>
+                        {% endif %}
+                        {% if assignment.hours_spent %}
+                            <p><strong>{% trans "Hours Spent:" %}</strong> <span class="badge badge-dark">{{ assignment.hours_spent }} hours</span></p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statusSelect = document.getElementById('id_status');
+    const hoursSpentGroup = document.getElementById('hoursSpentGroup');
+    const statusInstructions = document.getElementById('statusInstructions');
+    const instructionText = document.getElementById('instructionText');
+
+    const instructions = {
+        'accepted': '{% trans "You are confirming that you have accepted this assignment and will begin working on it." %}',
+        'in_progress': '{% trans "Mark as In Progress when you start actively working. Add notes about your current actions." %}',
+        'completed': '{% trans "Mark as Completed only when all tasks are finished. Hours spent is required for completed status." %}',
+        'cancelled': '{% trans "Use Cancelled only if the assignment cannot be completed. Explain the reason in notes." %}'
+    };
+
+    function updateInstructions() {
+        const status = statusSelect.value;
+        
+        if (status === 'completed') {
+            hoursSpentGroup.style.display = 'block';
+            document.getElementById('id_hours_spent').required = true;
+        } else {
+            hoursSpentGroup.style.display = 'none';
+            document.getElementById('id_hours_spent').required = false;
+        }
+
+        if (instructions[status]) {
+            instructionText.textContent = instructions[status];
+            statusInstructions.style.display = 'block';
+        } else {
+            statusInstructions.style.display = 'none';
+        }
+    }
+
+    statusSelect.addEventListener('change', updateInstructions);
+    updateInstructions(); // Initial check
+});
+</script>
+{% endblock %}

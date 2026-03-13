@@ -1,0 +1,248 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% trans "RakshaNet - Disaster Management System" %}{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        .language-switcher {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 5px;
+        }
+        .role-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+        .role-ngo { background: #007bff; color: white; }
+        .role-volunteer { background: #28a745; color: white; }
+        .role-user { background: #6c757d; color: white; }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 10px;
+        }
+        .alert-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+        }
+        .dashboard-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <form method="post" action="{% url 'set-language' %}" id="language-form">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <select name="language" onchange="document.getElementById('language-form').submit()" class="form-control form-control-sm">
+                <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
+                <option value="hi" {% if LANGUAGE_CODE == 'hi' %}selected{% endif %}>हिन्दी</option>
+                <option value="te" {% if LANGUAGE_CODE == 'te' %}selected{% endif %}>తెలుగు</option>
+                <option value="kn" {% if LANGUAGE_CODE == 'kn' %}selected{% endif %}>ಕನ್ನಡ</option>
+                <option value="ta" {% if LANGUAGE_CODE == 'ta' %}selected{% endif %}>தமிழ்</option>
+                <option value="ml" {% if LANGUAGE_CODE == 'ml' %}selected{% endif %}>മലയാളം</option>
+                <option value="bn" {% if LANGUAGE_CODE == 'bn' %}selected{% endif %}>বাংলা</option>
+                <option value="mr" {% if LANGUAGE_CODE == 'mr' %}selected{% endif %}>मराठी</option>
+                <option value="gu" {% if LANGUAGE_CODE == 'gu' %}selected{% endif %}>ગુજરાતી</option>
+                <option value="or" {% if LANGUAGE_CODE == 'or' %}selected{% endif %}>ଓଡ଼ିଆ</option>
+            </select>
+        </form>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% if user.is_authenticated %}{% if user.profile.is_ngo_or_admin %}{% url 'ngo-dashboard' %}{% elif user.profile.is_volunteer %}{% url 'volunteer-dashboard' %}{% else %}{% url 'user-dashboard' %}{% endif %}{% else %}{% url 'landing' %}{% endif %}">
+                <i class="fas fa-shield-alt"></i> {% trans "RakshaNet" %}
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% if user.is_authenticated %}{% if user.profile.is_ngo_or_admin %}{% url 'ngo-dashboard' %}{% elif user.profile.is_volunteer %}{% url 'volunteer-dashboard' %}{% else %}{% url 'user-dashboard' %}{% endif %}{% else %}{% url 'landing' %}{% endif %}">{% trans "Home" %}</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'emergency-alerts' %}">
+                                <i class="fas fa-exclamation-triangle"></i> {% trans "Emergency Alerts" %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'view-shelters' %}">
+                                <i class="fas fa-home"></i> {% trans "Shelters" %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'safety-tips' %}">
+                                <i class="fas fa-life-ring"></i> {% trans "Safety Tips" %}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'community-chat' %}">
+                                <i class="fas fa-comments"></i> {% trans "Live Chat & AI" %}
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+                
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link position-relative" href="{% url 'notifications' %}">
+                                <i class="fas fa-bell"></i>
+                                <span class="notification-badge" id="notification-count">0</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
+                                {{ user.username }}
+                                {% if user.profile %}
+                                    {% if user.profile.is_ngo_or_admin %}
+                                        <span class="role-badge role-ngo">{% trans "NGO" %}</span>
+                                    {% elif user.profile.is_volunteer %}
+                                        <span class="role-badge role-volunteer">{% trans "Volunteer" %}</span>
+                                    {% else %}
+                                        <span class="role-badge role-user">{% trans "User" %}</span>
+                                    {% endif %}
+                                {% endif %}
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                {% if user.profile.is_ngo_or_admin %}
+                                    <a class="dropdown-item" href="{% url 'ngo-dashboard' %}">
+                                        <i class="fas fa-tachometer-alt"></i> {% trans "NGO Dashboard" %}
+                                    </a>
+                                {% elif user.profile.is_volunteer %}
+                                    <a class="dropdown-item" href="{% url 'volunteer-dashboard' %}">
+                                        <i class="fas fa-tachometer-alt"></i> {% trans "Volunteer Dashboard" %}
+                                    </a>
+                                {% else %}
+                                    <a class="dropdown-item" href="{% url 'user-dashboard' %}">
+                                        <i class="fas fa-tachometer-alt"></i> {% trans "My Dashboard" %}
+                                    </a>
+                                {% endif %}
+                                <a class="dropdown-item" href="{% url 'profile' %}">
+                                    <i class="fas fa-user"></i> {% trans "Profile" %}
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt"></i> {% trans "Logout" %}
+                                </a>
+                            </div>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">{% trans "Register" %}</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert">
+                        <span>&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="container mt-4 mb-5">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2026 {% trans "RakshaNet - Disaster Management System" %}</p>
+            <p>
+                <a href="{% url 'contact' %}" class="text-white">{% trans "Contact Us" %}</a> |
+                <a href="#" class="text-white">{% trans "Privacy Policy" %}</a> |
+                <a href="#" class="text-white">{% trans "Terms of Service" %}</a>
+            </p>
+            <p>{% trans "Emergency Helpline" %}: <strong>112</strong></p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        // Load notification count
+        function loadNotificationCount() {
+            {% if user.is_authenticated %}
+            fetch('/raksha/api/notifications/unread/')
+                .then(response => response.json())
+                .then(data => {
+                    const count = data.length;
+                    if (count > 0) {
+                        document.getElementById('notification-count').textContent = count;
+                        document.getElementById('notification-count').style.display = 'block';
+                    } else {
+                        document.getElementById('notification-count').style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error loading notifications:', error));
+            {% endif %}
+        }
+        
+        // Load on page load and refresh every 30 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            loadNotificationCount();
+            setInterval(loadNotificationCount, 30000);
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

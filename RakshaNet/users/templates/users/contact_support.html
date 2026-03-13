@@ -1,0 +1,57 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Contact Support" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-headset"></i> {% trans "Contact RakshaNet Support" %}</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        {% trans "Share your issue related to requests, shelters, donations, volunteer actions, or account/profile. Our support team will help you." %}
+                    </p>
+
+                    <form method="post" action="{% url 'contact' %}">
+                        {% csrf_token %}
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="name">{% trans "Full Name" %}</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="email">{% trans "Email" %}</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="phone">{% trans "Phone Number" %}</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" placeholder="+91">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>{% trans "Emergency Helpline" %}</label>
+                                <div class="form-control bg-light"><strong>112</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="desc">{% trans "Message" %}</label>
+                            <textarea class="form-control" id="desc" name="desc" rows="4" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-info">
+                            <i class="fas fa-paper-plane"></i> {% trans "Send Message" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,381 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Volunteer Profile Setup" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-shield"></i> {% trans "Volunteer Profile Setup" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <p class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        {% trans "Complete your volunteer profile to receive assignments and help people in need during disasters." %}
+                    </p>
+
+                    <form method="post" id="volunteerProfileForm">
+                        {% csrf_token %}
+                        
+                        <h5 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-star"></i> {% trans "Primary Information" %}
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.phone.id_for_label }}">
+                                        {{ form.phone.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.phone }}
+                                    {% if form.phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.phone.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.alternate_phone.id_for_label }}">
+                                        {{ form.alternate_phone.label }}
+                                    </label>
+                                    {{ form.alternate_phone }}
+                                    {% if form.alternate_phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.alternate_phone.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.primary_skill.id_for_label }}">
+                                        {{ form.primary_skill.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.primary_skill }}
+                                    {% if form.primary_skill.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.primary_skill.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.experience_years.id_for_label }}">
+                                        {{ form.experience_years.label }}
+                                    </label>
+                                    {{ form.experience_years }}
+                                    {% if form.experience_years.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.experience_years.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ form.experience_years.help_text }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.available.id_for_label }}">
+                                        {{ form.available.label }}
+                                    </label>
+                                    <div class="form-check">
+                                        {{ form.available }}
+                                        <label class="form-check-label" for="{{ form.available.id_for_label }}">
+                                            {% trans "I am currently available for assignments" %}
+                                        </label>
+                                    </div>
+                                    {% if form.available.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.available.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="border-bottom pb-2 mb-3 mt-4">
+                            <i class="fas fa-phone"></i> {% trans "Contact Information" %}
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.phone_number.id_for_label }}">
+                                        {{ form.phone_number.label }}
+                                    </label>
+                                    {{ form.phone_number }}
+                                    {% if form.phone_number.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.phone_number.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ form.phone_number.help_text }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.alternate_phone.id_for_label }}">
+                                        {{ form.alternate_phone.label }}
+                                    </label>
+                                    {{ form.alternate_phone }}
+                                    {% if form.alternate_phone.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.alternate_phone.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.emergency_contact.id_for_label }}">
+                                {{ form.emergency_contact.label }}
+                            </label>
+                            {{ form.emergency_contact }}
+                            {% if form.emergency_contact.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.emergency_contact.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.emergency_contact.help_text }}</small>
+                        </div>
+
+                        <h5 class="border-bottom pb-2 mb-3 mt-4">
+                            <i class="fas fa-car"></i> {% trans "Vehicle & Equipment" %}
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.has_vehicle.id_for_label }}">
+                                        {{ form.has_vehicle.label }}
+                                    </label>
+                                    <div class="form-check">
+                                        {{ form.has_vehicle }}
+                                        <label class="form-check-label" for="{{ form.has_vehicle.id_for_label }}">
+                                            {% trans "I have my own vehicle" %}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6" id="vehicleTypeDiv">
+                                <div class="form-group">
+                                    <label for="{{ form.vehicle_type.id_for_label }}">
+                                        {{ form.vehicle_type.label }}
+                                    </label>
+                                    {{ form.vehicle_type }}
+                                    {% if form.vehicle_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.vehicle_type.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ form.vehicle_type.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h5 class="border-bottom pb-2 mb-3 mt-4">
+                            <i class="fas fa-certificate"></i> {% trans "Qualifications & Skills" %}
+                        </h5>
+
+                        <div class="form-group">
+                            <label for="{{ form.languages_spoken.id_for_label }}">
+                                {{ form.languages_spoken.label }}
+                            </label>
+                            {{ form.languages_spoken }}
+                            {% if form.languages_spoken.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.languages_spoken.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.languages_spoken.help_text }}</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.certifications.id_for_label }}">
+                                {{ form.certifications.label }}
+                            </label>
+                            {{ form.certifications }}
+                            {% if form.certifications.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.certifications.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.certifications.help_text }}</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.special_equipment.id_for_label }}">
+                                {{ form.special_equipment.label }}
+                            </label>
+                            {{ form.special_equipment }}
+                            {% if form.special_equipment.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.special_equipment.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.special_equipment.help_text }}</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.notes.id_for_label }}">
+                                {{ form.notes.label }}
+                            </label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.notes.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.notes.help_text }}</small>
+                        </div>
+
+                        <h5 class="border-bottom pb-2 mb-3 mt-4">
+                            <i class="fas fa-map-marker-alt"></i> {% trans "Location for AI Insights" %}
+                        </h5>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            {% trans "AI nearby assignment insights require your location. Use your current location or enter coordinates manually." %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.latitude.id_for_label }}">{{ form.latitude.label }}</label>
+                                    {{ form.latitude }}
+                                    {% if form.latitude.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.latitude.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.longitude.id_for_label }}">{{ form.longitude.label }}</label>
+                                    {{ form.longitude }}
+                                    {% if form.longitude.errors %}
+                                        <div class="invalid-feedback d-block">{{ form.longitude.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="button" class="btn btn-outline-primary" id="useCurrentLocationBtn">
+                                <i class="fas fa-location-arrow"></i> {% trans "Use Current Location" %}
+                            </button>
+                            <small id="locationStatus" class="form-text text-muted"></small>
+                        </div>
+
+                        <hr>
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save"></i> {% trans "Save Profile" %}
+                            </button>
+                            <a href="{% url 'volunteer-dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> {% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card mt-3 border-info">
+                <div class="card-body">
+                    <h5 class="text-info"><i class="fas fa-lightbulb"></i> {% trans "Profile Tips" %}</h5>
+                    <ul class="mb-0">
+                        <li>{% trans "Complete all sections for better assignment matching" %}</li>
+                        <li>{% trans "Keep your availability status updated" %}</li>
+                        <li>{% trans "List all relevant certifications and skills" %}</li>
+                        <li>{% trans "Provide accurate contact information" %}</li>
+                        <li>{% trans "Include any special equipment you can bring" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hasVehicleCheckbox = document.getElementById('id_has_vehicle');
+    const vehicleTypeDiv = document.getElementById('vehicleTypeDiv');
+    
+
+    const locationBtn = document.getElementById('useCurrentLocationBtn');
+    const locationStatus = document.getElementById('locationStatus');
+    const latInput = document.getElementById('id_latitude');
+    const lonInput = document.getElementById('id_longitude');
+
+    if (locationBtn && latInput && lonInput) {
+        locationBtn.addEventListener('click', function() {
+            if (!navigator.geolocation) {
+                locationStatus.textContent = 'Geolocation is not supported by your browser.';
+                locationStatus.className = 'form-text text-danger';
+                return;
+            }
+
+            locationStatus.textContent = 'Fetching your location...';
+            locationStatus.className = 'form-text text-info';
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    latInput.value = position.coords.latitude.toFixed(6);
+                    lonInput.value = position.coords.longitude.toFixed(6);
+                    locationStatus.textContent = 'Location added successfully. Please save profile.';
+                    locationStatus.className = 'form-text text-success';
+                },
+                function(error) {
+                    let message = 'Unable to get location.';
+                    if (error.code === error.PERMISSION_DENIED) {
+                        message = 'Location permission denied. Allow location in browser settings.';
+                    }
+                    locationStatus.textContent = message;
+                    locationStatus.className = 'form-text text-danger';
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                }
+            );
+        });
+    }
+    function toggleVehicleType() {
+        if (hasVehicleCheckbox.checked) {
+            vehicleTypeDiv.style.display = 'block';
+        } else {
+            vehicleTypeDiv.style.display = 'none';
+            document.getElementById('id_vehicle_type').value = '';
+        }
+    }
+    
+    hasVehicleCheckbox.addEventListener('change', toggleVehicleType);
+    toggleVehicleType(); // Initial check
+});
+</script>
+{% endblock %}

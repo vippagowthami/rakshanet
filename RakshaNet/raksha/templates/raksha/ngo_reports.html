@@ -1,0 +1,373 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Reports & Analytics" %} - RakshaNet{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+        transition: transform 0.2s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .chart-container {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .date-filter {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .progress-bar-custom {
+        height: 30px;
+        font-size: 14px;
+        line-height: 30px;
+    }
+    .disaster-type-item {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
+    .disaster-type-item:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-chart-bar"></i> {% trans "Reports & Analytics" %}</h2>
+            <p class="text-muted">{% trans "Comprehensive statistics and performance metrics" %}</p>
+        </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="row">
+        <div class="col-12">
+            <div class="date-filter">
+                <form method="get" class="form-inline">
+                    <label class="mr-2"><i class="fas fa-calendar"></i> {% trans "Date Range Filter (Optional):" %}</label>
+                    <input type="date" name="start_date" class="form-control mr-2" value="{% if start_date %}{{ start_date|date:'Y-m-d' }}{% endif %}" placeholder="Start Date">
+                    <span class="mr-2">{% trans "to" %}</span>
+                    <input type="date" name="end_date" class="form-control mr-2" value="{% if end_date %}{{ end_date|date:'Y-m-d' }}{% endif %}" placeholder="End Date">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> {% trans "Apply Filter" %}
+                    </button>
+                    <a href="{% url 'ngo-reports' %}" class="btn btn-secondary ml-2">
+                        <i class="fas fa-redo"></i> {% trans "Clear Filter" %}
+                    </a>
+                </form>
+                {% if date_filtered %}
+                <div class="alert alert-success mt-3 mb-0">
+                    <i class="fas fa-filter"></i> {% trans "Showing filtered data from" %} {{ start_date }} {% trans "to" %} {{ end_date }}
+                </div>
+                {% else %}
+                <div class="alert alert-info mt-3 mb-0">
+                    <i class="fas fa-infinity"></i> {% trans "Showing all-time data (matches your home dashboard)" %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Statistics -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stat-card text-center border-left-primary">
+                <div class="stat-label">
+                    <i class="fas fa-clipboard-list"></i> {% trans "Total Requests" %}
+                </div>
+                <div class="stat-number text-primary">{{ stats.total_requests }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-center border-left-success">
+                <div class="stat-label">
+                    <i class="fas fa-check-circle"></i> {% trans "Completed" %}
+                </div>
+                <div class="stat-number text-success">{{ stats.completed }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-center border-left-warning">
+                <div class="stat-label">
+                    <i class="fas fa-spinner"></i> {% trans "In Progress" %}
+                </div>
+                <div class="stat-number text-warning">{{ stats.in_progress }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-center border-left-danger">
+                <div class="stat-label">
+                    <i class="fas fa-users"></i> {% trans "People Helped" %}
+                </div>
+                <div class="stat-number text-info">{{ stats.people_helped }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-center border-left-success">
+                <div class="stat-label">
+                    <i class="fas fa-percentage"></i> {% trans "Success Rate" %}
+                </div>
+                <div class="stat-number text-success">
+                    {{ stats.success_rate }}%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secondary Statistics -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="stat-card text-center border-left-warning">
+                <div class="stat-label">
+                    <i class="fas fa-clock"></i> {% trans "Pending" %}
+                </div>
+                <div class="stat-number text-warning">{{ stats.pending }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-center">
+                <div class="stat-label">
+                    <i class="fas fa-user-shield"></i> {% trans "Active Volunteers" %}
+                </div>
+                <div class="stat-number text-success">{{ stats.volunteers_active }}</div>
+                <small class="text-muted">{% trans "out of" %} {{ stats.total_volunteers }}</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-center">
+                <div class="stat-label">
+                    <i class="fas fa-dollar-sign"></i> {% trans "Total Donations" %}
+                </div>
+                <div class="stat-number text-success">₹{{ stats.total_donations|floatformat:2 }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card text-center">
+                <div class="stat-label">
+                    <i class="fas fa-times-circle"></i> {% trans "Cancelled Requests" %}
+                </div>
+                <div class="stat-number text-danger">{{ stats.cancelled }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Chart -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h4><i class="fas fa-tasks"></i> {% trans "Request Status Distribution" %}</h4>
+                <hr>
+                <div class="mb-3">
+                    <label>{% trans "Completed" %} ({{ stats.completed }})</label>
+                    <div class="progress" style="height: 25px;">
+                        {% if stats.total_requests > 0 %}
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {% widthratio stats.completed stats.total_requests 100 %}%"
+                             aria-valuenow="{{ stats.completed }}" aria-valuemin="0" aria-valuemax="{{ stats.total_requests }}">
+                            {% widthratio stats.completed stats.total_requests 100 %}%
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label>{% trans "In Progress" %} ({{ stats.in_progress }})</label>
+                    <div class="progress" style="height: 25px;">
+                        {% if stats.total_requests > 0 %}
+                        <div class="progress-bar bg-info" role="progressbar" 
+                             style="width: {% widthratio stats.in_progress stats.total_requests 100 %}%"
+                             aria-valuenow="{{ stats.in_progress }}" aria-valuemin="0" aria-valuemax="{{ stats.total_requests }}">
+                            {% widthratio stats.in_progress stats.total_requests 100 %}%
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label>{% trans "Pending" %} ({{ stats.pending }})</label>
+                    <div class="progress" style="height: 25px;">
+                        {% if stats.total_requests > 0 %}
+                        <div class="progress-bar bg-warning" role="progressbar" 
+                             style="width: {% widthratio stats.pending stats.total_requests 100 %}%"
+                             aria-valuenow="{{ stats.pending }}" aria-valuemin="0" aria-valuemax="{{ stats.total_requests }}">
+                            {% widthratio stats.pending stats.total_requests 100 %}%
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label>{% trans "Cancelled" %} ({{ stats.cancelled }})</label>
+                    <div class="progress" style="height: 25px;">
+                        {% if stats.total_requests > 0 %}
+                        <div class="progress-bar bg-danger" role="progressbar" 
+                             style="width: {% widthratio stats.cancelled stats.total_requests 100 %}%"
+                             aria-valuenow="{{ stats.cancelled }}" aria-valuemin="0" aria-valuemax="{{ stats.total_requests }}">
+                            {% widthratio stats.cancelled stats.total_requests 100 %}%
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Disaster Types -->
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h4><i class="fas fa-fire-alt"></i> {% trans "Requests by Disaster Type" %}</h4>
+                <hr>
+                {% if stats.by_disaster_type %}
+                    {% for item in stats.by_disaster_type %}
+                    <div class="disaster-type-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ item.disaster_type__name|default:"Unknown" }}</strong>
+                        </div>
+                        <div>
+                            <span class="badge badge-primary badge-pill">{{ item.count }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center py-4">
+                        <i class="fas fa-inbox"></i> {% trans "No data available for this period" %}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Urgency Distribution -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="chart-container">
+                <h4><i class="fas fa-exclamation-triangle"></i> {% trans "Requests by Urgency Level" %}</h4>
+                <hr>
+                {% if stats.by_urgency %}
+                    <div class="row">
+                        {% for item in stats.by_urgency %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <div class="card-body text-center
+                                    {% if item.urgency == 'critical' %}bg-danger text-white
+                                    {% elif item.urgency == 'high' %}bg-warning text-white
+                                    {% elif item.urgency == 'medium' %}bg-info text-white
+                                    {% else %}bg-secondary text-white{% endif %}">
+                                    <h5 class="card-title text-uppercase">
+                                        {% if item.urgency == 'critical' %}
+                                            <i class="fas fa-exclamation-circle"></i> {% trans "Critical" %}
+                                        {% elif item.urgency == 'high' %}
+                                            <i class="fas fa-exclamation-triangle"></i> {% trans "High" %}
+                                        {% elif item.urgency == 'medium' %}
+                                            <i class="fas fa-exclamation"></i> {% trans "Medium" %}
+                                        {% else %}
+                                            <i class="fas fa-info-circle"></i> {{ item.urgency|title }}
+                                        {% endif %}
+                                    </h5>
+                                    <p class="card-text" style="font-size: 2rem; font-weight: bold;">{{ item.count }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center py-4">
+                        <i class="fas fa-inbox"></i> {% trans "No urgency data available for this period" %}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="chart-container">
+                <h4><i class="fas fa-info-circle"></i> {% trans "Summary" %}</h4>
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>{% trans "Organization:" %}</h5>
+                        <p><strong>{{ ngo_profile.organization_name }}</strong></p>
+                        
+                        <h5>{% trans "Period:" %}</h5>
+                        {% if date_filtered %}
+                            <p>{{ start_date }} {% trans "to" %} {{ end_date }}</p>
+                        {% else %}
+                            <p><strong>{% trans "All Time" %}</strong> ({% trans "No date filter applied" %})</p>
+                        {% endif %}
+                        
+                        <h5 class="mt-3">{% trans "Performance Metrics:" %}</h5>
+                        <ul>
+                            <li>{% trans "Total Requests Handled:" %} <strong>{{ stats.total_requests }}</strong></li>
+                            <li>{% trans "Successfully Completed:" %} <strong>{{ stats.completed }}</strong></li>
+                            <li>{% trans "Currently In Progress:" %} <strong>{{ stats.in_progress }}</strong></li>
+                            <li>{% trans "Pending Processing:" %} <strong>{{ stats.pending }}</strong></li>
+                            <li>{% trans "People Impacted:" %} <strong>{{ stats.people_helped }}</strong></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>{% trans "Key Highlights:" %}</h5>
+                        <ul>
+                            <li>
+                                {% trans "Success Rate:" %} 
+                                <strong>{{ stats.success_rate }}%</strong>
+                            </li>
+                            <li>{% trans "Active Volunteers:" %} <strong>{{ stats.volunteers_active }}</strong> / {{ stats.total_volunteers }}</li>
+                            <li>{% trans "Total Donations Received:" %} <strong>₹{{ stats.total_donations|floatformat:2 }}</strong></li>
+                            <li>{% trans "Pending Requests:" %} <strong>{{ stats.pending }}</strong></li>
+                            <li>{% trans "Cancelled Requests:" %} <strong>{{ stats.cancelled }}</strong></li>
+                        </ul>
+
+                        <div class="mt-4">
+                            <a href="{% url 'ngo-dashboard' %}" class="btn btn-primary">
+                                <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                            </a>
+                            <button onclick="window.print()" class="btn btn-secondary">
+                                <i class="fas fa-print"></i> {% trans "Print Report" %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add print styles
+    window.addEventListener('beforeprint', function() {
+        document.body.classList.add('printing');
+    });
+    
+    window.addEventListener('afterprint', function() {
+        document.body.classList.remove('printing');
+    });
+</script>
+{% endblock %}

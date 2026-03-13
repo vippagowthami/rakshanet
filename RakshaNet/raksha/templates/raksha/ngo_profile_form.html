@@ -1,0 +1,300 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "NGO Profile Setup" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-building"></i> {% trans "NGO Profile Setup" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <p class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        {% trans "Complete your NGO profile to manage disaster response operations effectively." %}
+                    </p>
+
+                    <form method="post" id="ngoProfileForm">
+                        {% csrf_token %}
+                        
+                        <h5 class="border-bottom pb-2 mb-3">
+                            <i class="fas fa-info"></i> {% trans "Organization Information" %}
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.user.id_for_label }}">
+                                        {{ form.user.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.user }}
+                                    {% if form.user.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.user.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.organization_name.id_for_label }}">
+                                        {{ form.organization_name.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.organization_name }}
+                                    {% if form.organization_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.organization_name.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.registration_number.id_for_label }}">
+                                        {{ form.registration_number.label }}
+                                    </label>
+                                    {{ form.registration_number }}
+                                    {% if form.registration_number.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.registration_number.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ form.registration_number.help_text }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.service_areas.id_for_label }}">
+                                        {{ form.service_areas.label }}
+                                    </label>
+                                    {{ form.service_areas }}
+                                    {% if form.service_areas.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.service_areas.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ form.service_areas.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.description.id_for_label }}">
+                                {{ form.description.label }}
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.description.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.description.help_text }}</small>
+                        </div>
+
+                        <h5 class="border-bottom pb-2 mb-3 mt-4">
+                            <i class="fas fa-shield-alt"></i> {% trans "Specialization & Resources" %}
+                        </h5>
+
+                        <div class="form-group">
+                            <label for="{{ form.specialization.id_for_label }}">
+                                {{ form.specialization.label }}
+                            </label>
+                            {{ form.specialization }}
+                            {% if form.specialization.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.specialization.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.specialization.help_text }}</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.available_resources.id_for_label }}">
+                                {{ form.available_resources.label }}
+                            </label>
+                            {{ form.available_resources }}
+                            {% if form.available_resources.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.available_resources.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.available_resources.help_text }}</small>
+                        </div>
+
+                        <h5 class="border-bottom pb-2 mb-3 mt-4">
+                            <i class="fas fa-phone"></i> {% trans "Contact Information" %}
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.contact_number.id_for_label }}">
+                                        {{ form.contact_number.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.contact_number }}
+                                    {% if form.contact_number.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.contact_number.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.email.id_for_label }}">
+                                        {{ form.email.label }}
+                                    </label>
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.email.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.address.id_for_label }}">
+                                {{ form.address.label }}
+                            </label>
+                            {{ form.address }}
+                            {% if form.address.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.address.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.latitude.id_for_label }}">
+                                        {{ form.latitude.label }}
+                                    </label>
+                                    {{ form.latitude }}
+                                    {% if form.latitude.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.latitude.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.longitude.id_for_label }}">
+                                        {{ form.longitude.label }}
+                                    </label>
+                                    {{ form.longitude }}
+                                    {% if form.longitude.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.longitude.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <button type="button" class="btn btn-sm btn-info mb-3" onclick="getLocation()">
+                                    <i class="fas fa-map-marker-alt"></i> {% trans "Get Current Location" %}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.website.id_for_label }}">
+                                        {{ form.website.label }}
+                                    </label>
+                                    {{ form.website }}
+                                    {% if form.website.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.website.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>{% trans "Status" %}</label>
+                                    <div class="form-check">
+                                        {{ form.is_verified }}
+                                        <label class="form-check-label" for="{{ form.is_verified.id_for_label }}">
+                                            {{ form.is_verified.label }}
+                                        </label>
+                                    </div>
+                                    <small class="form-text text-muted">{{ form.is_verified.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> {% trans "Save Profile" %}
+                            </button>
+                            <a href="{% url 'ngo-dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> {% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card mt-3 border-info">
+                <div class="card-body">
+                    <h5 class="text-info"><i class="fas fa-lightbulb"></i> {% trans "Profile Tips" %}</h5>
+                    <ul class="mb-0">
+                        <li>{% trans "Complete all fields for better visibility and credibility" %}</li>
+                        <li>{% trans "Select all disaster types your organization can handle" %}</li>
+                        <li>{% trans "List all available resources to help match crisis requests" %}</li>
+                        <li>{% trans "Provide accurate contact information for emergency coordination" %}</li>
+                        <li>{% trans "Verification by admin increases trust and assignment priority" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                document.getElementById('id_latitude').value = position.coords.latitude.toFixed(6);
+                document.getElementById('id_longitude').value = position.coords.longitude.toFixed(6);
+                alert("{% trans 'Location coordinates filled successfully!' %}");
+            },
+            function(error) {
+                alert("{% trans 'Unable to get location. Please enter manually.' %}");
+            }
+        );
+    } else {
+        alert("{% trans 'Geolocation is not supported by this browser.' %}");
+    }
+}
+</script>
+{% endblock %}

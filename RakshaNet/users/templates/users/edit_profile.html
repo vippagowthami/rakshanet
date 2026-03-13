@@ -1,0 +1,65 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Edit Profile" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-user-edit"></i> {% trans "Edit Profile" %}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <div class="text-center mb-4">
+                            <img src="{{ user.profile.image.url }}" alt="Current Profile" class="rounded-circle" style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #667eea;">
+                            <p class="text-muted mt-2 mb-0">{% trans "Current profile picture" %}</p>
+                        </div>
+
+                        <h5 class="mb-3">{% trans "Account Details" %}</h5>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="id_username">{% trans "Username" %}</label>
+                                {{ u_form.username }}
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="id_email">{% trans "Email" %}</label>
+                                {{ u_form.email }}
+                            </div>
+                        </div>
+
+                        <hr>
+                        <h5 class="mb-3">{% trans "Profile Settings" %}</h5>
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label for="id_image">{% trans "Profile Image" %}</label>
+                                {{ p_form.image }}
+                            </div>
+                        </div>
+
+                        {% if u_form.errors or p_form.errors %}
+                        <div class="alert alert-danger">
+                            {{ u_form.errors }}
+                            {{ p_form.errors }}
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'profile' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> {% trans "Back to Profile" %}
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {% trans "Save Changes" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

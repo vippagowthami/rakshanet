@@ -1,0 +1,175 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Safety Tips" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>
+                <i class="fas fa-lightbulb text-info"></i> {% trans "Safety Tips" %}
+            </h1>
+            <hr>
+            <p>{% trans "Learn essential safety tips to prepare for and respond to different types of disasters." %}</p>
+        </div>
+    </div>
+
+    <!-- Filter by Disaster Type -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <form method="GET" class="form-inline">
+                        <label for="type" class="mr-2">{% trans "Filter by Disaster Type:" %}</label>
+                        <select name="type" id="type" class="form-control mr-3" onchange="this.form.submit()">
+                            <option value="">{% trans "All Disasters" %}</option>
+                            {% for dt in disaster_types %}
+                            <option value="{{ dt.id }}" {% if request.GET.type|stringformat:"s" == dt.id|stringformat:"s" %}selected{% endif %}>
+                                {{ dt.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if tips %}
+        <div class="tips-container">
+            <!-- Tips Grid -->
+            <div class="row">
+                {% for tip in tips %}
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-info text-white">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-star mr-2"></i>
+                                <strong>{{ tip.disaster_type.name }} - {% trans "Tip" %}</strong>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ tip.title }}</h5>
+                            <p class="card-text">{{ tip.content }}</p>
+
+                            <!-- Priority Badge -->
+                            <div class="mb-2">
+                                {% if tip.priority >= 9 %}
+                                    <span class="badge badge-danger">
+                                        <i class="fas fa-exclamation-circle"></i> {% trans "Critical" %}
+                                    </span>
+                                {% elif tip.priority >= 6 %}
+                                    <span class="badge badge-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> {% trans "Important" %}
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-info">
+                                        <i class="fas fa-info-circle"></i> {% trans "Information" %}
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light text-muted">
+                            <small>{% trans "Category:" %} <strong>{{ tip.get_category_display }}</strong></small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Tips by Category -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <h3>{% trans "Quick Reference" %}</h3>
+                <div class="accordion" id="tipsAccordion">
+                    <div class="card">
+                        <div class="card-header" id="headingBefore">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseBefore" aria-expanded="true" aria-controls="collapseBefore">
+                                    <i class="fas fa-arrow-left"></i> {% trans "Before Disaster" %}
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="collapseBefore" class="collapse" aria-labelledby="headingBefore" data-parent="#tipsAccordion">
+                            <div class="card-body">
+                                {% with tips|dictsort:"category" as sorted_tips %}
+                                <ul>
+                                    {% for tip in tips %}
+                                        {% if tip.category == 'before' %}
+                                        <li>{{ tip.title }} - {{ tip.content|truncatewords:10 }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                                {% endwith %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="headingDuring">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseDuring" aria-expanded="false" aria-controls="collapseDuring">
+                                    <i class="fas fa-exclamation-circle"></i> {% trans "During Disaster" %}
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="collapseDuring" class="collapse" aria-labelledby="headingDuring" data-parent="#tipsAccordion">
+                            <div class="card-body">
+                                <ul>
+                                    {% for tip in tips %}
+                                        {% if tip.category == 'during' %}
+                                        <li>{{ tip.title }} - {{ tip.content|truncatewords:10 }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header" id="headingAfter">
+                            <h2 class="mb-0">
+                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseAfter" aria-expanded="false" aria-controls="collapseAfter">
+                                    <i class="fas fa-heart"></i> {% trans "After Disaster" %}
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="collapseAfter" class="collapse" aria-labelledby="headingAfter" data-parent="#tipsAccordion">
+                            <div class="card-body">
+                                <ul>
+                                    {% for tip in tips %}
+                                        {% if tip.category == 'after' %}
+                                        <li>{{ tip.title }} - {{ tip.content|truncatewords:10 }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> 
+            {% trans "No safety tips available for the selected disaster type." %}
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.btn-link {
+    font-size: 1.1rem;
+    text-align: left;
+}
+</style>
+{% endblock %}

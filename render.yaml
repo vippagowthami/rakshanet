@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: RakshaNet
+    env: docker
+    plan: free
+    region: oregon
+    branch: main
+    dockerfilePath: Dockerfile
+    buildCommand: ''
+    startCommand: ''
+    envVars:
+      - key: SECRET_KEY
+        sync: false
+      - key: DEBUG
+        value: 'False'
+      - key: DATABASE_URL
+        sync: false
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false

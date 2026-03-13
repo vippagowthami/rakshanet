@@ -1,0 +1,174 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Emergency Contacts" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>
+                <i class="fas fa-phone text-warning"></i> {% trans "Emergency Contacts" %}
+            </h1>
+            <hr>
+            <p class="lead">{% trans "Important phone numbers and contacts for emergencies in your area." %}</p>
+        </div>
+    </div>
+
+    {% if contacts %}
+        <div class="row">
+            {% for contact in contacts %}
+            <div class="col-md-6 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-building"></i> {{ contact.name }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Phone Number -->
+                        <div class="mb-3">
+                            <strong>{% trans "Phone:" %}</strong><br>
+                            <a href="tel:{{ contact.phone_number }}" class="btn btn-success btn-sm">
+                                <i class="fas fa-phone"></i> {{ contact.phone_number }}
+                            </a>
+                        </div>
+
+                        <!-- Category -->
+                        {% if contact.category %}
+                        <div class="mb-2">
+                            <small><strong>{% trans "Category:" %}</strong></small><br>
+                            <span class="badge badge-primary">{{ contact.get_category_display }}</span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Address -->
+                        {% if contact.address %}
+                        <div class="mb-2">
+                            <strong>{% trans "Address:" %}</strong><br>
+                            <small>{{ contact.address }}</small>
+                        </div>
+                        {% endif %}
+
+                        <!-- Email -->
+                        {% if contact.email %}
+                        <div class="mb-2">
+                            <strong>{% trans "Email:" %}</strong><br>
+                            <a href="mailto:{{ contact.email }}" class="btn btn-info btn-sm">
+                                <i class="fas fa-envelope"></i> {% trans "Email" %}
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        <!-- Website -->
+                        {% if contact.website %}
+                        <div class="mb-2">
+                            <strong>{% trans "Website:" %}</strong><br>
+                            <a href="{{ contact.website }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-globe"></i> {% trans "Visit" %}
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        <!-- Description -->
+                        {% if contact.description %}
+                        <div class="alert alert-light mb-0">
+                            <small>{{ contact.description }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Important Numbers Summary -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card bg-danger text-white">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-circle"></i> {% trans "Important Numbers to Remember" %}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for contact in contacts %}
+                                {% if contact.category == 'emergency' or 'police' in contact.name|lower or 'ambulance' in contact.name|lower %}
+                                <div class="col-md-4 mb-2">
+                                    <strong>{{ contact.name }}:</strong> 
+                                    <span class="h5">{{ contact.phone_number }}</span>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> 
+            {% trans "No emergency contacts available at this time." %}
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">{% trans "Standard Emergency Numbers" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <strong>Police/Law Enforcement:</strong> <span class="h5">100</span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>Ambulance/Medical Emergency:</strong> <span class="h5">101 / 102</span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>Fire Department:</strong> <span class="h5">101</span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <strong>Disaster/Crisis Helpline:</strong> <span class="h5">1070</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Tips Card -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-lightbulb"></i> {% trans "Emergency Contact Tips" %}
+                    </h5>
+                    <ul>
+                        <li>{% trans "Save these numbers in your phone and write them down for family members" %}</li>
+                        <li>{% trans "During emergencies, always dial the appropriate emergency number first" %}</li>
+                        <li>{% trans "Provide clear and accurate information to the emergency operator" %}</li>
+                        <li>{% trans "Keep yourself calm and follow instructions from emergency responders" %}</li>
+                        <li>{% trans "For non-emergency situations, look for local control room numbers" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 1rem;
+}
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.btn {
+    white-space: nowrap;
+}
+</style>
+{% endblock %}

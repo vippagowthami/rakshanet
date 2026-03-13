@@ -1,0 +1,131 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Emergency Alerts" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between">
+                <h1>
+                    <i class="fas fa-bell text-danger"></i> {% trans "Emergency Alerts" %}
+                </h1>
+                {% if user.is_authenticated and user.profile.is_ngo_or_admin %}
+                <a href="{% url 'ngo-create-alert' %}" class="btn btn-danger">
+                    <i class="fas fa-plus"></i> {% trans "Create Alert" %}
+                </a>
+                {% endif %}
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    {% if alerts %}
+        <div class="row">
+            {% for alert in alerts %}
+            <div class="col-md-6 mb-3">
+                <div class="card border-danger shadow h-100">
+                    <div class="card-header bg-danger text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="fas fa-exclamation-circle"></i> {{ alert.disaster_type.name|default:"Alert" }}
+                            </h5>
+                            <span class="badge badge-light text-danger">
+                                {{ alert.get_severity_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-title">{{ alert.title }}</h6>
+                        <p class="card-text">{{ alert.message|truncatewords:50 }}</p>
+                        
+                        <div class="alert alert-info mb-2">
+                            <small>
+                                <i class="fas fa-map-marker-alt"></i> <strong>{% trans "Affected Area:" %}</strong> {{ alert.affected_area }}
+                            </small>
+                        </div>
+                        
+
+                    </div>
+                    <div class="card-footer bg-light">
+                        <small class="text-muted">
+                            <i class="fas fa-clock"></i> 
+                            {% blocktrans with time=alert.created_at %}
+                            Created {{ time }}
+                            {% endblocktrans %}
+                        </small>
+                        {% if user.is_authenticated and user.profile.is_ngo_or_admin %}
+                        <div class="float-right">
+                            <a href="{% url 'ngo-edit-alert' alert.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'ngo-deactivate-alert' alert.id %}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-times"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Legend for severity -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6 class="card-title">
+                            <i class="fas fa-info-circle"></i> {% trans "Severity Levels" %}
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <span class="badge badge-danger">Extreme</span> - {% trans "Immediate danger, evacuate" %}
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge badge-warning">Severe</span> - {% trans "Serious threat, take precautions" %}
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge badge-info">Moderate</span> - {% trans "Be alert and prepared" %}
+                            </div>
+                            <div class="col-md-3">
+                                <span class="badge badge-secondary">Minor</span> - {% trans "Information only" %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> 
+            {% trans "No active emergency alerts at this time." %}
+        </div>
+
+        <div class="card bg-light">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Stay Safe" %}</h5>
+                <ul>
+                    <li>{% trans "Keep your emergency kit ready and stored in an easily accessible location" %}</li>
+                    <li>{% trans "Know your local emergency contact numbers" %}</li>
+                    <li>{% trans "Have an emergency plan for your family" %}</li>
+                    <li>{% trans "Check back frequently for any updates" %}</li>
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,194 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}
+        {% trans "Edit Inventory Item" %}
+    {% else %}
+        {% trans "Add Inventory Item" %}
+    {% endif %} - RakshaNet
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-boxes"></i>
+                        {% if form.instance.pk %}
+                            {% trans "Edit Inventory Item" %}
+                        {% else %}
+                            {% trans "Add Inventory Item" %}
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" id="inventoryForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.resource_type.id_for_label }}">
+                                        {{ form.resource_type.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.resource_type }}
+                                    {% if form.resource_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.resource_type.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.ngo.id_for_label }}">
+                                        {{ form.ngo.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.ngo }}
+                                    {% if form.ngo.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.ngo.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ form.ngo.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.quantity.id_for_label }}">
+                                        {{ form.quantity.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.quantity }}
+                                    {% if form.quantity.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.quantity.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.unit.id_for_label }}">
+                                        {{ form.unit.label }} <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.unit }}
+                                    {% if form.unit.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.unit.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ form.unit.help_text }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.expiry_date.id_for_label }}">
+                                        {{ form.expiry_date.label }}
+                                    </label>
+                                    {{ form.expiry_date }}
+                                    {% if form.expiry_date.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.expiry_date.errors }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ form.expiry_date.help_text }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.location.id_for_label }}">
+                                {{ form.location.label }}
+                            </label>
+                            {{ form.location }}
+                            {% if form.location.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.location.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.location.help_text }}</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.notes.id_for_label }}">
+                                {{ form.notes.label }}
+                            </label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.notes.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if form.instance.pk %}
+                            <div class="alert alert-info">
+                                <strong>{% trans "Last Updated:" %}</strong> {{ form.instance.last_updated|date:"M d, Y H:i" }}
+                            </div>
+                        {% endif %}
+
+                        <hr>
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-info btn-lg">
+                                <i class="fas fa-save"></i>
+                                {% if form.instance.pk %}
+                                    {% trans "Update Item" %}
+                                {% else %}
+                                    {% trans "Add Item" %}
+                                {% endif %}
+                            </button>
+                            <a href="{% url 'ngo-inventory' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> {% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if form.instance.pk %}
+            <div class="card mt-3 border-warning">
+                <div class="card-body">
+                    <h5 class="text-warning"><i class="fas fa-exclamation-triangle"></i> {% trans "Delete Item" %}</h5>
+                    <p class="text-muted">{% trans "This action cannot be undone. Please be certain." %}</p>
+                    <a href="{% url 'ngo-delete-inventory' form.instance.pk %}" 
+                       class="btn btn-danger"
+                       onclick="return confirm('{% trans 'Are you sure?' %}')">
+                        <i class="fas fa-trash"></i> {% trans "Delete This Item" %}
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-set expiry date picker to future dates only
+document.addEventListener('DOMContentLoaded', function() {
+    const expiryInput = document.getElementById('id_expiry_date');
+    if (expiryInput) {
+        const today = new Date().toISOString().split('T')[0];
+        expiryInput.setAttribute('min', today);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Delete Inventory Item" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> {% trans "Confirm Deletion" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5><i class="fas fa-warning"></i> {% trans "Warning!" %}</h5>
+                        <p>{% trans "You are about to delete the following inventory item. This action cannot be undone." %}</p>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-box"></i> {{ item.resource_type.name }}
+                            </h5>
+                            <p class="card-text">
+                                <strong>{% trans "Quantity:" %}</strong> {{ item.quantity }} {{ item.unit }}<br>
+                                <strong>{% trans "Location:" %}</strong> {{ item.location|default:"Not specified" }}<br>
+                                {% if item.expiry_date %}
+                                    <strong>{% trans "Expiry Date:" %}</strong> 
+                                    <span class="{% if item.expiry_date < today %}text-danger{% endif %}">
+                                        {{ item.expiry_date|date:"M d, Y" }}
+                                    </span><br>
+                                {% endif %}
+                                <strong>{% trans "Last Updated:" %}</strong> {{ item.last_updated|date:"M d, Y H:i" }}
+                            </p>
+                            {% if item.notes %}
+                                <p><strong>{% trans "Notes:" %}</strong><br>
+                                    <small>{{ item.notes|truncatechars:100 }}</small>
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if item.quantity > 100 %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>{% trans "Notice:" %}</strong>
+                            {% trans "This is a high-quantity item. Please verify before deletion." %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fas fa-trash"></i> {% trans "Yes, Delete Item" %}
+                            </button>
+                            <a href="{% url 'ngo-inventory' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> {% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

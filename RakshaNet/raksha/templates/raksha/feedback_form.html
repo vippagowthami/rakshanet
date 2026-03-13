@@ -1,0 +1,217 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Submit Feedback" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-comment-dots"></i> {% trans "Submit Feedback" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <p class="text-muted">
+                        <i class="fas fa-info-circle"></i>
+                        {% trans "Your feedback helps us improve our disaster response services. Please share your experience and suggestions." %}
+                    </p>
+
+                    <form method="post" id="feedbackForm">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="{{ form.feedback_type.id_for_label }}">
+                                {{ form.feedback_type.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.feedback_type }}
+                            {% if form.feedback_type.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.feedback_type.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group" id="volunteerGroup" style="display:none;">
+                            <label for="{{ form.volunteer.id_for_label }}">
+                                {{ form.volunteer.label }}
+                            </label>
+                            {{ form.volunteer }}
+                            {% if form.volunteer.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.volunteer.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{% trans "Select the volunteer you want to provide feedback for" %}</small>
+                        </div>
+
+                        <div class="form-group" id="ngoGroup" style="display:none;">
+                            <label for="{{ form.ngo.id_for_label }}">
+                                {{ form.ngo.label }}
+                            </label>
+                            {{ form.ngo }}
+                            {% if form.ngo.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.ngo.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{% trans "Select the NGO you want to provide feedback for" %}</small>
+                        </div>
+
+                        <div class="form-group" id="assignmentGroup" style="display:none;">
+                            <label for="{{ form.assignment.id_for_label }}">
+                                {{ form.assignment.label }}
+                            </label>
+                            {{ form.assignment }}
+                            {% if form.assignment.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.assignment.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{% trans "Select the assignment related to this feedback (optional)" %}</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.rating.id_for_label }}">
+                                <strong>{{ form.rating.label }}</strong> <span class="text-danger">*</span>
+                            </label>
+                            <div class="rating-stars mb-2">
+                                <span class="star" data-rating="1">☆</span>
+                                <span class="star" data-rating="2">☆</span>
+                                <span class="star" data-rating="3">☆</span>
+                                <span class="star" data-rating="4">☆</span>
+                                <span class="star" data-rating="5">☆</span>
+                            </div>
+                            {{ form.rating }}
+                            {% if form.rating.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.rating.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{% trans "Rate from 1 (poor) to 5 (excellent)" %}</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.comment.id_for_label }}">
+                                {{ form.comment.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.comment }}
+                            {% if form.comment.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.comment.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{{ form.comment.help_text }}</small>
+                        </div>
+
+                        <hr>
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-info btn-lg">
+                                <i class="fas fa-paper-plane"></i> {% trans "Submit Feedback" %}
+                            </button>
+                            <a href="{% url 'user-dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> {% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card mt-3 border-info">
+                <div class="card-body">
+                    <h5 class="text-info"><i class="fas fa-question-circle"></i> {% trans "Feedback Guidelines" %}</h5>
+                    <ul class="mb-0">
+                        <li>{% trans "Be honest and constructive with your feedback" %}</li>
+                        <li>{% trans "Rate volunteers and NGOs fairly based on your experience" %}</li>
+                        <li>{% trans "Provide specific details to help us improve" %}</li>
+                        <li>{% trans "System feedback helps us enhance the app functionality" %}</li>
+                        <li>{% trans "Your feedback is confidential and used for improvement only" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.rating-stars span {
+    font-size: 2em;
+    cursor: pointer;
+    color: #ddd;
+    transition: color 0.2s;
+}
+.rating-stars span:hover,
+.rating-stars span.active {
+    color: #ffc107;
+}
+#id_rating {
+    display: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const feedbackType = document.getElementById('id_feedback_type');
+    const assignmentGroup = document.getElementById('assignmentGroup');
+    const volunteerGroup = document.getElementById('volunteerGroup');
+    const ngoGroup = document.getElementById('ngoGroup');
+
+    // Show/hide fields based on feedback type
+    function toggleFields() {
+        const type = feedbackType.value;
+        
+        // Reset visibility
+        assignmentGroup.style.display = 'none';
+        volunteerGroup.style.display = 'none';
+        ngoGroup.style.display = 'none';
+        
+        if (type === 'volunteer') {
+            volunteerGroup.style.display = 'block';
+            assignmentGroup.style.display = 'block';
+        } else if (type === 'ngo') {
+            ngoGroup.style.display = 'block';
+        }
+    }
+
+    feedbackType.addEventListener('change', toggleFields);
+    toggleFields(); // Initial check
+
+    // Star rating
+    const stars = document.querySelectorAll('.star');
+    const ratingInput = document.getElementById('id_rating');
+    
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = this.getAttribute('data-rating');
+            ratingInput.value = rating;
+            
+            stars.forEach(s => {
+                if (s.getAttribute('data-rating') <= rating) {
+                    s.textContent = '★';
+                    s.classList.add('active');
+                } else {
+                    s.textContent = '☆';
+                    s.classList.remove('active');
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,356 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% trans "RakshaNet - Disaster Management System" %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .navbar-landing {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .navbar-landing .navbar-brand {
+            color: #667eea !important;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .navbar-landing .nav-link {
+            color: #333 !important;
+            margin: 0 10px;
+            transition: all 0.3s;
+        }
+
+        .navbar-landing .nav-link:hover {
+            color: #667eea !important;
+        }
+
+        .btn-login, .btn-register {
+            margin: 0 5px;
+            border-radius: 25px;
+            padding: 8px 20px;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .btn-register {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-login:hover, .btn-register:hover {
+            transform: scale(1.05);
+        }
+
+        .landing-hero {
+            text-align: center;
+            color: white;
+            animation: fadeIn 0.8s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-icon {
+            font-size: 5rem;
+            margin-bottom: 30px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+
+        .feature-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .feature-text {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .cta-buttons {
+            margin-top: 40px;
+        }
+
+        .btn-cta {
+            margin: 10px;
+            border-radius: 30px;
+            padding: 12px 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-cta-primary {
+            background: white;
+            color: #667eea;
+            border: 2px solid white;
+        }
+
+        .btn-cta-primary:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .info-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            margin-top: 60px;
+            color: white;
+        }
+
+        .info-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .info-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            opacity: 0.95;
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            margin-top: 60px;
+        }
+
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .language-selector select {
+            border-radius: 20px;
+            padding: 8px 15px;
+            border: none;
+            background: white;
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <form method="post" action="{% url 'set-language' %}" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <select name="language" onchange="this.form.submit()">
+                <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
+                <option value="hi" {% if LANGUAGE_CODE == 'hi' %}selected{% endif %}>हिन्दी</option>
+                <option value="te" {% if LANGUAGE_CODE == 'te' %}selected{% endif %}>తెలుగు</option>
+                <option value="kn" {% if LANGUAGE_CODE == 'kn' %}selected{% endif %}>ಕನ್ನಡ</option>
+                <option value="ta" {% if LANGUAGE_CODE == 'ta' %}selected{% endif %}>தமிழ்</option>
+                <option value="ml" {% if LANGUAGE_CODE == 'ml' %}selected{% endif %}>മലയാളം</option>
+                <option value="bn" {% if LANGUAGE_CODE == 'bn' %}selected{% endif %}>বাংলা</option>
+                <option value="mr" {% if LANGUAGE_CODE == 'mr' %}selected{% endif %}>मराठी</option>
+                <option value="gu" {% if LANGUAGE_CODE == 'gu' %}selected{% endif %}>ગુજરાતી</option>
+                <option value="or" {% if LANGUAGE_CODE == 'or' %}selected{% endif %}>ଓଡ଼ିଆ</option>
+            </select>
+        </form>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-landing fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt"></i> {% trans "RakshaNet" %}
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="btn btn-login" href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt"></i> {% trans "Login" %}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-register" href="{% url 'register' %}">
+                            <i class="fas fa-user-plus"></i> {% trans "Register" %}
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="container mt-5" style="padding-top: 60px;">
+        <div class="landing-hero">
+            <div class="hero-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1 class="hero-title">{% trans "RakshaNet" %}</h1>
+            <p class="hero-subtitle">{% trans "Community Disaster Management & Response Platform" %}</p>
+            
+            <div class="cta-buttons">
+                <a href="{% url 'login' %}" class="btn btn-cta btn-cta-primary">
+                    <i class="fas fa-sign-in-alt"></i> {% trans "Login Now" %}
+                </a>
+                <a href="{% url 'register' %}" class="btn btn-cta btn-cta-primary">
+                    <i class="fas fa-user-plus"></i> {% trans "Get Started" %}
+                </a>
+            </div>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="feature-cards">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h3 class="feature-title">{% trans "Report Crisis" %}</h3>
+                <p class="feature-text">{% trans "Quickly report emergency situations and get immediate help from our network of trained volunteers and NGOs." %}</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-users-cog"></i>
+                </div>
+                <h3 class="feature-title">{% trans "Volunteer Network" %}</h3>
+                <p class="feature-text">{% trans "Join our volunteer community and help save lives during disaster emergencies in your area." %}</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3 class="feature-title">{% trans "NGO Coordination" %}</h3>
+                <p class="feature-text">{% trans "Coordinate disaster response operations, manage resources, and help communities recover faster." %}</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <h3 class="feature-title">{% trans "Emergency Shelters" %}</h3>
+                <p class="feature-text">{% trans "Find nearby shelters during emergencies with real-time availability and contact information." %}</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h3 class="feature-title">{% trans "Safety Tips" %}</h3>
+                <p class="feature-text">{% trans "Learn essential safety tips and emergency preparedness guides for various types of disasters." %}</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-phone"></i>
+                </div>
+                <h3 class="feature-title">{% trans "Emergency Contacts" %}</h3>
+                <p class="feature-text">{% trans "Access important emergency contacts and support services available in your region." %}</p>
+            </div>
+        </div>
+
+        <!-- Info Section -->
+        <div class="info-section">
+            <h2 class="info-title">{% trans "About RakshaNet" %}</h2>
+            <p class="info-text">
+                {% trans "RakshaNet is a comprehensive disaster management platform designed to connect people, volunteers, and organizations during emergencies. Our mission is to save lives and reduce suffering through quick coordination and effective resource management." %}
+            </p>
+            <p class="info-text" style="margin-top: 20px;">
+                {% trans "By supporting 10 Indian languages and providing real-time alerts, shelter information, and volunteer coordination, RakshaNet ensures no community is left behind during crisis situations." %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 {% trans "RakshaNet - Disaster Management System" %}. {% trans "All rights reserved." %}</p>
+        <p style="margin-top: 10px; opacity: 0.8;">
+            {% trans "Working together to save lives and build resilient communities." %}
+        </p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

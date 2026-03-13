@@ -1,0 +1,363 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "My Profile" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <!-- Profile Header -->
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow mb-4">
+                <div class="card-body text-center p-5">
+                    <!-- Profile Image -->
+                    <div class="mb-3">
+                        {% if user.profile.image %}
+                            <img src="{{ user.profile.image.url }}" alt="Profile" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover; border: 4px solid #667eea;">
+                        {% else %}
+                            <div class="rounded-circle" style="width: 150px; height: 150px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; margin: 0 auto; color: white; font-size: 4rem;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- User Info -->
+                    <h2>{{ user.first_name|default:user.username }}</h2>
+                    <p class="text-muted">
+                        <strong>{{ user.email }}</strong>
+                    </p>
+
+                    <!-- Role Badge -->
+                    <span class="badge" style="background: {% if user.profile.is_ngo_or_admin %}#007bff{% elif user.profile.is_volunteer %}#28a745{% else %}#6c757d{% endif %}; color: white; padding: 8px 15px; font-size: 0.95rem;">
+                        {% if user.profile.is_ngo_or_admin %}<i class="fas fa-building"></i> {% trans "NGO/Admin" %}
+                        {% elif user.profile.is_volunteer %}<i class="fas fa-user-shield"></i> {% trans "Volunteer" %}
+                        {% else %}<i class="fas fa-user-circle"></i> {% trans "Common User" %}{% endif %}
+                    </span>
+
+                    <!-- Edit Profile Button -->
+                    <div class="mt-4">
+                        <a href="{% url 'edit-profile' %}" class="btn btn-primary-custom">
+                            <i class="fas fa-edit"></i> {% trans "Edit Profile" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                {% if not user.profile.is_volunteer %}
+                <div class="col-md-4 mb-3">
+                    <div class="card text-center" style="border-left: 4px solid #667eea;">
+                        <div class="card-body">
+                            <h3 class="text-primary" id="donation-count">--</h3>
+                            <p class="text-muted">{% trans "Donations" %}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="col-md-4 mb-3">
+                    <div class="card text-center" style="border-left: 4px solid #28a745;">
+                        <div class="card-body">
+                            <h3 class="text-success" id="review-count">--</h3>
+                            <p class="text-muted">{% trans "Reviews/Ratings" %}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="card text-center" style="border-left: 4px solid #ffc107;">
+                        <div class="card-body">
+                            <h3 class="text-warning" id="rating-avg">--</h3>
+                            <p class="text-muted">{% trans "Average Rating" %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Info Section -->
+            {% if user.profile.is_volunteer %}
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-medal"></i> {% trans "Volunteer Statistics" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong>{% trans "Tasks Completed:" %}</strong>
+                            <p class="h5">{{ user.volunteer_profile.tasks_completed|default:0 }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>{% trans "Hours Volunteered:" %}</strong>
+                            <p class="h5">{{ user.volunteer_profile.total_hours_volunteered|default:0 }} hrs</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>{% trans "Skills:" %}</strong>
+                            <p>{{ user.volunteer_profile.skills|default:"Not specified" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>{% trans "Certifications:" %}</strong>
+                            <p>{{ user.volunteer_profile.certifications|default:"None" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if user.profile.is_ngo_or_admin %}
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-organization"></i> {% trans "Organization Info" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% if user.ngo_profile %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong>{% trans "Organization Name:" %}</strong>
+                            <p>{{ user.ngo_profile.organization_name }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>{% trans "Registration Number:" %}</strong>
+                            <p>{{ user.ngo_profile.registration_number|default:"--" }}</p>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <strong>{% trans "Service Areas:" %}</strong>
+                            <p>{{ user.ngo_profile.service_areas|default:"Not specified" }}</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">{% trans "Organization profile not completed." %}</p>
+                    <a href="{% url 'ngo-profile-setup' %}" class="btn btn-primary-custom">
+                        {% trans "Setup Organization Profile" %}
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Reviews & Feedback Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-star"></i> {% trans "Reviews & Feedback" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="reviews-container">
+                        <p class="text-muted text-center py-3">{% trans "Loading reviews..." %}</p>
+                    </div>
+                </div>
+            </div>
+
+            {% if not user.profile.is_volunteer %}
+            <!-- Donations Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-heart"></i> {% trans "Donation History" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="donations-container">
+                        <p class="text-muted text-center py-3">{% trans "Loading donations..." %}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Contact & Support History -->
+            <div class="card mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-comments"></i> {% trans "Support & Contact History" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="contactAccordion">
+                        <div id="contact-container">
+                            <p class="text-muted text-center py-3">{% trans "Loading contact history..." %}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Language & Settings Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-cog"></i> {% trans "Settings" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <strong>{% trans "Language Preference:" %}</strong>
+                            <p class="mt-3 mb-0 text-muted">{% trans "Use the Google Translate option in the top bar to switch language instantly." %}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>{% trans "Member Since:" %}</strong>
+                            <p class="mt-3">{{ user.date_joined|date:"d M Y" }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Update Password -->
+                    <div class="mt-4 pt-3 border-top">
+                        <h6 class="mb-3">{% trans "Security" %}</h6>
+                        <a href="{% url 'password-reset' %}" class="btn btn-sm btn-warning">
+                            <i class="fas fa-key"></i> {% trans "Change Password" %}
+                        </a>
+                    </div>
+
+                    <!-- Logout -->
+                    <div class="mt-4 pt-3 border-top">
+                        <a href="{% url 'logout' %}" class="btn btn-sm btn-danger">
+                            <i class="fas fa-sign-out-alt"></i> {% trans "Logout" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Account (Optional) -->
+            <div class="card mb-4 border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-trash"></i> {% trans "Danger Zone" %}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-danger">{% trans "Permanently delete your account and all associated data." %}</p>
+                    <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteAccountModal">
+                        {% trans "Delete Account" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">{% trans "Delete Account" %}</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger">
+                        <strong>{% trans "Warning:" %}</strong> {% trans "This action cannot be undone. All your data will be permanently deleted." %}
+                    </p>
+                    <p>{% trans "Type your password to confirm deletion:" %}</p>
+                    <form id="deleteAccountForm" method="post" action="{% url 'profile' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_account">
+                        <input type="password" name="password" class="form-control" placeholder="{% trans 'Enter your password' %}" required>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="button" class="btn btn-danger" onclick="document.getElementById('deleteAccountForm').submit();">
+                        {% trans "Yes, Delete My Account" %}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const apiBase = "{% url 'api-dashboard' %}".replace('dashboard/', '');
+    const authToken = localStorage.getItem('authToken');
+    const apiHeaders = authToken ? { 'Authorization': 'Token ' + authToken } : {};
+
+    // Load reviews
+    fetch(apiBase + 'feedback/?limit=5', {
+        headers: apiHeaders
+    })
+    .then(r => r.json())
+    .then(data => {
+        let html = '';
+        const reviews = Array.isArray(data) ? data : (data.results || []);
+        if (reviews.length > 0) {
+            let ratingSum = 0;
+            reviews.slice(0, 5).forEach(review => {
+                const feedbackType = review.feedback_type || 'system';
+                const comment = review.comment || '';
+                const rating = Number(review.rating || 0);
+                ratingSum += rating;
+                html += `<div class="alert alert-light"><strong>${feedbackType}</strong><br>${comment}<br><small class="text-muted">Rating: ${'⭐'.repeat(rating)}</small></div>`;
+            });
+            document.getElementById('review-count').textContent = reviews.length;
+            const avgRating = ratingSum / reviews.length;
+            document.getElementById('rating-avg').textContent = avgRating.toFixed(1);
+        } else {
+            html = '<p class="text-muted">No reviews yet</p>';
+            document.getElementById('review-count').textContent = '0';
+            document.getElementById('rating-avg').textContent = '0.0';
+        }
+        document.getElementById('reviews-container').innerHTML = html;
+    })
+    .catch(e => {
+        console.error('Error loading reviews:', e);
+        document.getElementById('review-count').textContent = '0';
+        document.getElementById('rating-avg').textContent = '0.0';
+        document.getElementById('reviews-container').innerHTML = '<p class="text-muted">Unable to load reviews</p>';
+    });
+
+    {% if not user.profile.is_volunteer %}
+    // Load donations
+    fetch(apiBase + 'donations/?page_size=5', { headers: apiHeaders })
+    .then(r => r.json())
+    .then(data => {
+        const donations = Array.isArray(data) ? data : (data.results || []);
+        const donationCount = typeof data.count === 'number' ? data.count : donations.length;
+        document.getElementById('donation-count').textContent = donationCount;
+
+        if (donations.length > 0) {
+            let html = '';
+            donations.slice(0, 5).forEach(donation => {
+                const donor = donation.donor_name || 'User';
+                const type = donation.donation_type || 'donation';
+                const amount = donation.donation_type === 'money'
+                    ? `₹${Number(donation.amount || 0).toFixed(2)}`
+                    : (donation.note || '-');
+                const date = donation.created_at ? new Date(donation.created_at).toLocaleDateString() : '-';
+                html += `<div class="alert alert-info"><strong>${donor}</strong> - ${type}<br><em>${amount}</em><br><small>${date}</small></div>`;
+            });
+            document.getElementById('donations-container').innerHTML = html;
+        } else {
+            document.getElementById('donations-container').innerHTML = '<p class="text-muted">No donations yet</p>';
+        }
+    })
+    .catch(e => {
+        console.error('Error loading donations:', e);
+        document.getElementById('donations-container').innerHTML = '<p class="text-muted">Unable to load donations</p>';
+    });
+    {% endif %}
+});
+</script>
+
+<style>
+.btn-primary-custom {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+.btn-primary-custom:hover {
+    transform: scale(1.05);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+
+.rounded-circle {
+    transition: transform 0.3s;
+}
+
+.rounded-circle:hover {
+    transform: scale(1.05);
+}
+</style>
+{% endblock %}

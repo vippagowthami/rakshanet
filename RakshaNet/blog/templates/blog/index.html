@@ -1,0 +1,383 @@
+{% extends 'blog/base2.html' %} {% load static %} {% block css %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/1.8.10/tailwind.min.css"
+/>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'blog/bootstrap.min.css'%}"
+/>
+<link rel="stylesheet" type="text/css" href="{% static 'blog/demo.css'%}" />
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'blog/font-awesome.min.css'%}"
+/>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'blog/magnific-popup.css'%}"
+/>
+<link rel="stylesheet" type="text/css" href="{% static 'blog/set1.css'%}" />
+<link rel="stylesheet" type="text/css" href="{% static 'blog/set2.css'%}" />
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'blog/simple-line-icons.css'%}"
+/>
+<link rel="stylesheet" type="text/css" href="{% static 'blog/style.css'%}" />
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'blog/swiper.min.css'%}"
+/>
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{% static 'blog/themify-icons.css'%}"
+/>
+<style>
+  section.main-block {
+    background: rgba(255, 255, 255, 0.884);
+  }
+  h2,
+  h3 {
+    color: black;
+  }
+  h5 {
+    color: cornsilk;
+  }
+  .grid figure figcaption h5 {
+    font-weight: 700;
+  }
+  .grid figure p {
+    font-weight: 700;
+  }
+  .row h2 {
+    font-size: 80px;
+    color: black;
+    font-weight: 600;
+  }
+  section.text-gray-700.body-font {
+    background-color: antiquewhite;
+  }
+  body {
+    background: url(../../../media/Abract01.png) no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+  }
+  div .grid{
+    padding-bottom: 1.5rem;
+  }
+  a.btn.btn-danger {
+    margin-top: 5px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 20px;
+}
+</style>
+{% endblock %} {% block content %}
+
+<section
+  class="slider d-flex align-items-center"
+  style="
+    background: url(../../../media/slider.jpg) no-repeat;
+    background-size: cover;
+  "
+>
+  <div class="container">
+    <div class="row d-flex justify-content-center">
+      <div class="col-12 slider-content_wrap">
+        <h2>RakshaNet — Intelligent Crisis Coordination</h2>
+      </div>
+      <h3 class="col-12">
+        Coordinate faster. Prioritize smarter. Deliver help where it matters most.
+      </h3>
+      <div class="featured-btn-wrap col-12">
+        <a href="/api/raksha/dashboard/" class="btn btn-danger">VIEW DASHBOARD</a>
+        <a href="{% url 'blog-home' %}" class="btn btn-secondary" style="margin-left:12px;">VIEW REPORTS</a>
+      </div>
+    </div>
+  </div>
+</section>
+<!--// SLIDER -->
+<!--//END HEADER -->
+<!--============================= FIND PLACES =============================-->
+<section class="main-block">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-5">
+        <div class="styled-heading">
+          <h3>What do you want to donate?</h3>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4">
+        <div class="find-place-img_wrap">
+          <div class="grid">
+            <figure class="effect-ruby">
+              <img
+                src="../../../media/find-place1.jpg"
+                class="img-fluid"
+                alt="img13"
+              />
+              <a href="/category/Medicine/">
+              <figcaption>
+                <h5>MEDICINE</h5>
+                <p>Your one dose of inhaler can save someone's life</p>
+              </figcaption></a>
+            </figure>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="row find-img-align">
+          <div class="col-md-12">
+            <div class="find-place-img_wrap">
+              <div class="grid">
+                <figure class="effect-ruby">
+                  <img
+                    src="../../../media/find-place2.jpg"
+                    class="img-fluid"
+                    alt="img13"
+                  />
+                  <a href="/category/Ventilator/">
+                  <figcaption>
+                    <h5>VENTILLATORS</h5>
+                    <p>Donate Ventillator and give someone a hope to live</p>
+                  </figcaption></a>
+                </figure>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="find-place-img_wrap">
+              <div class="grid">
+                <figure class="effect-ruby">
+                  <img
+                    src="../../../media/find-place3.jpg"
+                    class="img-fluid"
+                    alt="img13"
+                  />
+                  <a href="/category/PPE%20Kit/">
+                  <figcaption>
+                    <h5>PPE KIT</h5>
+                    <p>Donate PPE KIT to Save our Superheroes</p>
+                  </figcaption></a>
+                </figure>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="row find-img-align">
+          <div class="col-md-12">
+            <div class="find-place-img_wrap">
+              <div class="grid">
+                <figure class="effect-ruby">
+                  <img
+                    src="../../../media/find-place4.jpg"
+                    class="img-fluid"
+                    alt="img13"
+                  />
+                  <a href="/category/Beds/">
+                  <figcaption>
+                    <h5>BEDS</h5>
+                    <p>
+                      With your donation someone will have a hope to survive
+                    </p>
+                  </figcaption></a>
+                </figure>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="find-place-img_wrap">
+              <div class="grid">
+                <figure class="effect-ruby">
+                  <img
+                    src="../../../media/find-place5.jpg"
+                    class="img-fluid"
+                    alt="img13"
+                  /><a href="/category/Other/">
+                  <figcaption>
+                    <h5>OTHERS</h5>
+                    <p>Donate other equipments to help needy people</p>
+                  </figcaption></a>
+                </figure>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!--//END FIND PLACES -->
+<!--============================= FEATURED PLACES =============================-->
+<section class="main-block light-bg">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-5">
+        <div class="styled-heading">
+          <h3>Featured NGOs</h3>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-4 featured-responsive">
+        <div class="featured-place-wrap">
+          <a href="/profile/15/">
+            <img src="../../../media/featured1.jpg" class="img-fluid" alt="#" />
+            <span class="featured-rating-orange">6.5</span>
+            <div class="featured-title-box">
+              <h6>Smile Foundation</h6>
+              <p>NGO</p>
+              <span>• </span>
+              <p>3 Reviews</p>
+              <span> • </span>
+              <p><span>$$$</span>$$</p>
+              <ul>
+                <li>
+                  <span class="icon-location-pin"></span>
+                  <p>1301 Avenue, Brooklyn, NY 11230</p>
+                </li>
+                <li>
+                  <span class="icon-screen-smartphone"></span>
+                  <p>+44 20 7336 8898</p>
+                </li>
+                <li>
+                  <span class="icon-link"></span>
+                  <p>https://burgerandlobster.com</p>
+                </li>
+              </ul>
+              <div class="bottom-icons">
+                <div class="closed-now">CLOSED NOW</div>
+                <span class="ti-heart"></span>
+                <span class="ti-bookmark"></span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="col-md-4 featured-responsive">
+        <div class="featured-place-wrap">
+          <a href="/profile/17/">
+            <img src="../../../media/featured2.jpg" class="img-fluid" alt="#" />
+            <span class="featured-rating-green">9.5</span>
+            <div class="featured-title-box">
+              <h6>People For Humanity</h6>
+              <p>NGO</p>
+              <span>• </span>
+              <p>3 Reviews</p>
+              <span> • </span>
+              <p><span>$$$</span>$$</p>
+              <ul>
+                <li>
+                  <span class="icon-location-pin"></span>
+                  <p>1301 Avenue, Brooklyn, NY 11230</p>
+                </li>
+                <li>
+                  <span class="icon-screen-smartphone"></span>
+                  <p>+44 20 7336 8898</p>
+                </li>
+                <li>
+                  <span class="icon-link"></span>
+                  <p>https://burgerandlobster.com</p>
+                </li>
+              </ul>
+              <div class="bottom-icons">
+                <div class="closed-now">CLOSED NOW</div>
+                <span class="ti-heart"></span>
+                <span class="ti-bookmark"></span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+      <div class="col-md-4 featured-responsive">
+        <div class="featured-place-wrap">
+          <a href="/profile/16/">
+            <img src="../../../media/featured3.jpg" class="img-fluid" alt="#" />
+            <span class="featured-rating">3.2</span>
+            <div class="featured-title-box">
+              <h6>Live To Give</h6>
+              <p>NGO</p>
+              <span>• </span>
+              <p>3 Reviews</p>
+              <span> • </span>
+              <p><span>$$$</span>$$</p>
+              <ul>
+                <li>
+                  <span class="icon-location-pin"></span>
+                  <p>1301 Avenue, Brooklyn, NY 11230</p>
+                </li>
+                <li>
+                  <span class="icon-screen-smartphone"></span>
+                  <p>+44 20 7336 8898</p>
+                </li>
+                <li>
+                  <span class="icon-link"></span>
+                  <p>https://burgerandlobster.com</p>
+                </li>
+              </ul>
+              <div class="bottom-icons">
+                <div class="open-now">OPEN NOW</div>
+                <span class="ti-heart"></span>
+                <span class="ti-bookmark"></span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div class="row justify-content-center">
+      <div class="col-md-4">
+        <div class="featured-btn-wrap">
+          <a href="#" class="btn btn-danger">VIEW ALL</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="text-gray-700 body-font">
+  <div class="container px-5 py-24 mx-auto">
+    <div class="flex flex-wrap -m-4 text-center">
+      <div class="p-4 sm:w-1/4 w-1/2">
+        <h2 class="title-font font-medium sm:text-4xl text-3xl text-gray-900">
+          2.7K
+        </h2>
+        <p class="leading-relaxed">Users</p>
+      </div>
+      <div class="p-4 sm:w-1/4 w-1/2">
+        <h2 class="title-font font-medium sm:text-4xl text-3xl text-gray-900">
+          1.8K
+        </h2>
+        <p class="leading-relaxed">Donations</p>
+      </div>
+      <div class="p-4 sm:w-1/4 w-1/2">
+        <h2 class="title-font font-medium sm:text-4xl text-3xl text-gray-900">
+          35
+        </h2>
+        <p class="leading-relaxed">NGOs</p>
+      </div>
+      <div class="p-4 sm:w-1/4 w-1/2">
+        <h2 class="title-font font-medium sm:text-4xl text-3xl text-gray-900">
+          5
+        </h2>
+        <p class="leading-relaxed">Products</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock%}

@@ -1,0 +1,901 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Dashboard" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-2">
+                {% blocktrans with name=user.get_full_name|default:user.username %}
+                Welcome, {{ name }}!
+                {% endblocktrans %}
+            </h2>
+            <p class="text-muted">
+                {% if user.profile %}
+                    {% if user.profile.is_ngo_or_admin %}
+                        <span class="badge badge-primary"><i class="fas fa-building"></i> NGO/Admin</span>
+                    {% elif user.profile.is_volunteer %}
+                        <span class="badge badge-success"><i class="fas fa-user-shield"></i> Volunteer</span>
+                    {% else %}
+                        <span class="badge badge-secondary"><i class="fas fa-user"></i> User</span>
+                    {% endif %}
+                {% else %}
+                    <span class="badge badge-secondary">Loading profile...</span>
+                {% endif %}
+                | {% trans "Here's your dashboard" %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Quick Stats Row -->
+    <div class="row mb-4" id="statsContainer">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-spinner fa-spin"></i> {% trans "Loading stats..." %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Role-Specific Quick Actions -->
+    {% if user.is_authenticated and user.profile %}
+        {% if user.profile.is_ngo_or_admin %}
+        <!-- NGO Dashboard Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="mb-3">
+                    <i class="fas fa-building"></i> {% trans "NGO Operations" %}
+                </h3>
+            </div>
+
+            <!-- Row 1: Main Actions -->
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check-circle fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">{% trans "Verify Requests" %}</h5>
+                        <p class="card-text text-muted" id="pendingCount">--</p>
+                        <a href="{% url 'ngo-dashboard' %}" class="btn btn-info btn-sm">
+                            <i class="fas fa-eye"></i> {% trans "View" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-home fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">{% trans "Shelters" %}</h5>
+                        <p class="card-text text-muted" id="shelterCount">--</p>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="{% url 'ngo-shelters' %}" class="btn btn-success">
+                                <i class="fas fa-list"></i> {% trans "List" %}
+                            </a>
+                            <a href="{% url 'ngo-create-shelter' %}" class="btn btn-success">
+                                <i class="fas fa-plus"></i> {% trans "New" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-boxes fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">{% trans "Inventory" %}</h5>
+                        <p class="card-text text-muted" id="inventoryCount">--</p>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="{% url 'ngo-inventory' %}" class="btn btn-warning">
+                                <i class="fas fa-list"></i> {% trans "List" %}
+                            </a>
+                            <a href="{% url 'ngo-add-inventory' %}" class="btn btn-warning">
+                                <i class="fas fa-plus"></i> {% trans "Add" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-bell fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">{% trans "Alerts" %}</h5>
+                        <p class="card-text text-muted" id="alertCount">--</p>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="{% url 'ngo-manage-alerts' %}" class="btn btn-danger">
+                                <i class="fas fa-list"></i> {% trans "List" %}
+                            </a>
+                            <a href="{% url 'ngo-create-alert' %}" class="btn btn-danger">
+                                <i class="fas fa-plus"></i> {% trans "New" %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Additional Actions -->
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">{% trans "Assign Volunteer" %}</h5>
+                        <p class="card-text text-muted">{% trans "Create new assignment" %}</p>
+                        <a href="{% url 'ngo-create-assignment' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-arrow-right"></i> {% trans "Go" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-bar fa-3x text-secondary mb-3"></i>
+                        <h5 class="card-title">{% trans "Reports" %}</h5>
+                        <p class="card-text text-muted">{% trans "View analytics" %}</p>
+                        <a href="{% url 'ngo-reports' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-right"></i> {% trans "Go" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-map-marked-alt fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">{% trans "Map Dashboard" %}</h5>
+                        <p class="card-text text-muted">{% trans "Track crisis points visually" %}</p>
+                        <a href="{% url 'raksha-dashboard' %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-location-arrow"></i> {% trans "Open Map" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">{% trans "Volunteers" %}</h5>
+                        <p class="card-text text-muted" id="volunteerCount">--</p>
+                        <a href="{% url 'ngo-volunteers' %}" class="btn btn-info btn-sm">
+                            <i class="fas fa-arrow-right"></i> {% trans "View" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-building fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">{% trans "My Profile" %}</h5>
+                        <p class="card-text text-muted">{% trans "Organization details" %}</p>
+                        <a href="{% url 'ngo-profile-setup' %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-arrow-right"></i> {% trans "Go" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-hand-holding-heart fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">{% trans "Donations" %}</h5>
+                        <p class="card-text text-muted" id="ngoDonationCount">--</p>
+                        <a href="{% url 'donations' %}" class="btn btn-danger btn-sm">
+                            <i class="fas fa-arrow-right"></i> {% trans "View" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% elif user.profile.is_volunteer %}
+        <!-- Volunteer Dashboard Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="mb-3">
+                    <i class="fas fa-user-shield"></i> {% trans "Volunteer Dashboard" %}
+                </h3>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-tasks fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">{% trans "My Assignments" %}</h5>
+                        <p class="card-text text-muted" id="assignmentCount">--</p>
+                        <a href="{% url 'volunteer-history' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-list"></i> {% trans "View All" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-edit fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">{% trans "My Profile" %}</h5>
+                        <p class="card-text text-muted">{% trans "Update skills & info" %}</p>
+                        <a href="{% url 'volunteer-profile-setup' %}" class="btn btn-info btn-sm">
+                            <i class="fas fa-edit"></i> {% trans "Update" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">{% trans "Availability" %}</h5>
+                        <p class="card-text text-muted" id="availabilityStatus">{% trans "Checking..." %}</p>
+                        <button class="btn btn-success btn-sm" onclick="toggleAvailability()">
+                            <i class="fas fa-toggle-on"></i> {% trans "Toggle" %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-history fa-3x text-secondary mb-3"></i>
+                        <h5 class="card-title">{% trans "Completed Tasks" %}</h5>
+                        <p class="card-text text-muted" id="completedCount">--</p>
+                        <a href="{% url 'volunteer-history' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-eye"></i> {% trans "View History" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">{% trans "My Rating" %}</h5>
+                        <p class="card-text text-muted" id="ratingDisplay">-- / 5.0</p>
+                        <a href="{% url 'volunteer-history' %}" class="btn btn-warning btn-sm">
+                            <i class="fas fa-chart-bar"></i> {% trans "Stats" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% elif user.profile.is_common_user %}
+        <!-- User Dashboard Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h3 class="mb-3">
+                    <i class="fas fa-user-circle"></i> {% trans "My Crisis Management" %}
+                </h3>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100 border-danger">
+                    <div class="card-body text-center">
+                        <i class="fas fa-plus-circle fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">{% trans "Report Crisis" %}</h5>
+                        <p class="card-text text-muted">{% trans "Submit emergency report" %}</p>
+                        <a href="{% url 'create-crisis-request' %}" class="btn btn-danger btn-lg">
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-history fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">{% trans "My Requests" %}</h5>
+                        <p class="card-text text-muted" id="userRequestCount">--</p>
+                        <a href="{% url 'user-request-history' %}" class="btn btn-info btn-sm">
+                            <i class="fas fa-list"></i> {% trans "View" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-heart fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">{% trans "Give Feedback" %}</h5>
+                        <p class="card-text text-muted">{% trans "Rate & comment" %}</p>
+                        <a href="{% url 'submit-feedback' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-star"></i> {% trans "Feedback" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-home fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">{% trans "Shelters" %}</h5>
+                        <p class="card-text text-muted">{% trans "Find nearby shelters" %}</p>
+                        <a href="{% url 'public_shelters' %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-map"></i> {% trans "Find" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="col-12 mt-3">
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-chart-pie"></i> {% trans "Your Statistics" %}</h5>
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <strong id="totalUserRequests">--</strong><br>
+                            <small>{% trans "Total Requests" %}</small>
+                        </div>
+                        <div class="col-md-3">
+                            <strong id="pendingUserRequests">--</strong><br>
+                            <small>{% trans "Pending" %}</small>
+                        </div>
+                        <div class="col-md-3">
+                            <strong id="progressUserRequests">--</strong><br>
+                            <small>{% trans "In Progress" %}</small>
+                        </div>
+                        <div class="col-md-3">
+                            <strong id="completedUserRequests">--</strong><br>
+                            <small>{% trans "Completed" %}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+    {% endif %}
+
+    <!-- Common Section: Public Information & Alerts -->
+    <div class="row">
+        <div class="col-12">
+            <h3 class="mb-3">
+                <i class="fas fa-globe"></i> {% trans "Public Information" %}
+            </h3>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow h-100">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-bell"></i> {% trans "Active Emergency Alerts" %}</h5>
+                </div>
+                <div class="card-body" id="alertsContainer">
+                    <p class="text-muted"><i class="fas fa-spinner fa-spin"></i> {% trans "Loading..." %}</p>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'public_emergency_alerts' %}" class="btn btn-danger btn-sm">
+                        {% trans "View All Alerts" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-home"></i> {% trans "Available Shelters" %}</h5>
+                </div>
+                <div class="card-body" id="sheltersContainer">
+                    <p class="text-muted"><i class="fas fa-spinner fa-spin"></i> {% trans "Loading..." %}</p>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'public_shelters' %}" class="btn btn-success btn-sm">
+                        {% trans "View All Shelters" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> {% trans "Safety Tips" %}</h5>
+                </div>
+                <div class="card-body" id="tipsContainer">
+                    <p class="text-muted"><i class="fas fa-spinner fa-spin"></i> {% trans "Loading..." %}</p>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'public_safety_tips' %}" class="btn btn-info btn-sm">
+                        {% trans "View All Tips" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-phone"></i> {% trans "Emergency Contacts" %}</h5>
+                </div>
+                <div class="card-body" id="contactsContainer">
+                    <p class="text-muted"><i class="fas fa-spinner fa-spin"></i> {% trans "Loading..." %}</p>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'emergency_contacts' %}" class="btn btn-warning btn-sm">
+                        {% trans "View All Contacts" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card shadow h-100 border-danger">
+                <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-broadcast-tower"></i> {% trans "SOS Beacon (Live Emergency Escalation)" %}</h5>
+                    <button id="triggerSosBtn" class="btn btn-light btn-sm">
+                        <i class="fas fa-bell"></i> {% trans "Trigger SOS" %}
+                    </button>
+                </div>
+                <div class="card-body" id="sosBeaconContainer">
+                    <p class="text-muted mb-0"><i class="fas fa-spinner fa-spin"></i> {% trans "Loading SOS feed..." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card shadow h-100 border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-location-arrow"></i> {% trans "Nearby Services & Prioritized Resources" %}</h5>
+                </div>
+                <div class="card-body" id="geoServicesContainer">
+                    <p class="text-muted mb-0"><i class="fas fa-map-marker-alt"></i> {% trans "Enable location to load nearest shelters, NGOs, and prioritized resources." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Load dashboard data for authenticated users
+{% if user.is_authenticated %}
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardStats();
+    loadPublicData();
+    requestLocationAndLoadServices();
+    bindSosButton();
+    loadSosFeed();
+    setInterval(loadSosFeed, 10000);
+});
+
+function loadDashboardStats() {
+    const apiBase = "{% url 'api-dashboard' %}".replace('dashboard/', '');
+    // Get token from localStorage or use session auth
+    const token = localStorage.getItem('authToken');
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+    };
+    
+    if (token) {
+        headers['Authorization'] = 'Token ' + token;
+    }
+    
+    fetch(apiBase + 'dashboard/', {
+        method: 'GET',
+        headers: headers,
+        credentials: 'include'  // Include session cookies
+    })
+    .then(response => {
+        if (!response.ok) {
+            console.error('Dashboard API error:', response.status);
+            return null;
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data) {
+            console.error('Failed to load dashboard data');
+            return;
+        }
+        console.log('Dashboard data:', data);
+        
+        // Update statistics based on role
+        {% if user.profile.is_ngo_or_admin %}
+        document.getElementById('pendingCount').textContent = data.pending_requests + ' pending';
+        document.getElementById('shelterCount').textContent = (data.shelters_count || 0) + ' shelters';
+        document.getElementById('inventoryCount').textContent = (data.inventory_count || 0) + ' items';
+        document.getElementById('alertCount').textContent = (data.active_alerts || 0) + ' active';
+        document.getElementById('volunteerCount').textContent = (data.available_volunteers || 0) + ' available';
+        const ngoDonationCount = document.getElementById('ngoDonationCount');
+        if (ngoDonationCount) {
+            ngoDonationCount.textContent = (data.donation_count || 0) + ' records';
+        }
+        {% elif user.profile.is_volunteer %}
+        document.getElementById('assignmentCount').textContent = data.pending_assignments + ' pending';
+        document.getElementById('availabilityStatus').textContent = data.available ? 'Available ✓' : 'Unavailable ✗';
+        document.getElementById('completedCount').textContent = data.completed_assignments + ' completed';
+        document.getElementById('ratingDisplay').textContent = (data.rating || 0) + ' / 5.0';
+        {% elif user.profile.is_common_user %}
+        document.getElementById('userRequestCount').textContent = data.total_requests + ' requests';
+        document.getElementById('totalUserRequests').textContent = data.total_requests;
+        document.getElementById('pendingUserRequests').textContent = data.pending_requests;
+        document.getElementById('progressUserRequests').textContent = data.in_progress_requests;
+        document.getElementById('completedUserRequests').textContent = data.completed_requests;
+        {% endif %}
+    })
+    .catch(error => console.error('Error loading stats:', error));
+}
+
+function loadPublicData() {
+    const apiBase = "{% url 'api-dashboard' %}".replace('dashboard/', '');
+    // Load alerts
+    fetch(apiBase + 'alerts/?page_size=3')
+    .then(response => response.json())
+    .then(data => {
+        let html = '';
+        const results = data.results || data;
+        if (Array.isArray(results) && results.length > 0) {
+            results.forEach(alert => {
+                html += '<div class="alert alert-' + (alert.severity === 'extreme' ? 'danger' : 'warning') + ' mb-2"><strong>' + (alert.disaster_type_name || 'Alert') + '</strong><br>' + (alert.message || alert.affected_area || '').substring(0, 50) + '...</div>';
+            });
+        } else {
+            html = '<p class="text-muted">No active alerts</p>';
+        }
+        document.getElementById('alertsContainer').innerHTML = html;
+    })
+    .catch(error => {
+        console.error('Error loading alerts:', error);
+        document.getElementById('alertsContainer').innerHTML = '<p class="text-muted">Unable to load alerts</p>';
+    });
+
+    // Load shelters
+    fetch(apiBase + 'shelters/available/?page_size=3')
+    .then(response => response.json())
+    .then(data => {
+        let html = '';
+        const results = data.results || data;
+        if (Array.isArray(results) && results.length > 0) {
+            results.forEach(shelter => {
+                html += '<div class="mb-2"><strong>' + shelter.name + '</strong><br><small><i class="fas fa-map-marker-alt"></i> ' + (shelter.location || shelter.address || 'Location TBD').substring(0, 40) + '...</small></div>';
+            });
+        } else {
+            html = '<p class="text-muted">No available shelters</p>';
+        }
+        document.getElementById('sheltersContainer').innerHTML = html;
+    })
+    .catch(error => {
+        console.error('Error loading shelters:', error);
+        document.getElementById('sheltersContainer').innerHTML = '<p class="text-muted">Unable to load shelters</p>';
+    });
+
+    // Load safety tips
+    fetch(apiBase + 'safety-tips/?page_size=3')
+    .then(response => response.json())
+    .then(data => {
+        let html = '';
+        const results = data.results || data;
+        if (Array.isArray(results) && results.length > 0) {
+            results.forEach(tip => {
+                html += '<div class="mb-2"><strong>' + tip.title + '</strong><br><small>' + (tip.content || '').substring(0, 50) + '...</small></div>';
+            });
+        } else {
+            html = '<p class="text-muted">No tips available</p>';
+        }
+        document.getElementById('tipsContainer').innerHTML = html;
+    })
+    .catch(error => {
+        console.error('Error loading tips:', error);
+        document.getElementById('tipsContainer').innerHTML = '<p class="text-muted">Unable to load tips</p>';
+    });
+
+    // Load emergency contacts
+    fetch(apiBase + 'emergency-contacts/?page_size=3')
+    .then(response => response.json())
+    .then(data => {
+        let html = '';
+        const results = data.results || data;
+        if (Array.isArray(results) && results.length > 0) {
+            results.forEach(contact => {
+                html += '<div class="mb-2"><strong>' + contact.name + '</strong><br><i class="fas fa-phone"></i> <a href="tel:' + contact.phone_number + '">' + contact.phone_number + '</a></div>';
+            });
+        } else {
+            html = '<p class="text-muted">No contacts available</p>';
+        }
+        document.getElementById('contactsContainer').innerHTML = html;
+    })
+    .catch(error => {
+        console.error('Error loading contacts:', error);
+        document.getElementById('contactsContainer').innerHTML = '<p class="text-muted">Unable to load contacts</p>';
+    });
+}
+
+function toggleAvailability() {
+    const apiBase = "{% url 'api-dashboard' %}".replace('dashboard/', '');
+    const token = localStorage.getItem('authToken');
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+    };
+    
+    if (token) {
+        headers['Authorization'] = 'Token ' + token;
+    }
+    
+    // First, get the current volunteer ID
+    fetch(apiBase + 'volunteers/?page_size=100', {
+        method: 'GET',
+        headers: headers,
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        const volunteers = data.results || data;
+        if (volunteers && volunteers.length > 0) {
+            const volunteerId = volunteers[0].id;
+            const currentStatus = volunteers[0].available;
+            
+            // Toggle availability
+            return fetch(apiBase + 'volunteers/' + volunteerId + '/set_available/', {
+                method: 'POST',
+                headers: headers,
+                credentials: 'include',
+                body: JSON.stringify({ available: !currentStatus })
+            });
+        }
+        throw new Error('Could not find volunteer profile');
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Availability updated:', data);
+        loadDashboardStats();
+    })
+    .catch(error => {
+        console.error('Error toggling availability:', error);
+        alert('Error updating availability. Please try again.');
+    });
+}
+
+function getCsrfToken() {
+    const name = 'csrftoken=';
+    const decoded = decodeURIComponent(document.cookie || '');
+    const parts = decoded.split(';');
+    for (let i = 0; i < parts.length; i++) {
+        const c = parts[i].trim();
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length);
+        }
+    }
+    return '';
+}
+
+function requestLocationAndLoadServices() {
+    if (!navigator.geolocation) {
+        const box = document.getElementById('geoServicesContainer');
+        if (box) {
+            box.innerHTML = '<p class="text-danger mb-0">Geolocation is not supported in this browser.</p>';
+        }
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(function(position) {
+        const formData = new FormData();
+        formData.append('latitude', position.coords.latitude);
+        formData.append('longitude', position.coords.longitude);
+        formData.append('accuracy', position.coords.accuracy || '');
+
+        fetch('{% url "geo-update" %}', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCsrfToken() },
+            body: formData,
+            credentials: 'include'
+        })
+        .then(() => loadGeolocationServices())
+        .catch(() => loadGeolocationServices());
+    }, function() {
+        loadGeolocationServices();
+    }, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000
+    });
+}
+
+function bindSosButton() {
+    const btn = document.getElementById('triggerSosBtn');
+    if (!btn) return;
+
+    btn.addEventListener('click', function() {
+        const customMsg = prompt('Optional: add a short SOS message for responders', 'Need urgent assistance at my location');
+        if (customMsg === null) {
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('message', customMsg || 'Emergency SOS triggered. Immediate coordination required.');
+
+        fetch('{% url "sos-trigger" %}', {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCsrfToken() },
+            body: formData,
+            credentials: 'include'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                throw new Error('Unable to trigger SOS');
+            }
+            alert('SOS beacon triggered successfully. Responders have been notified.');
+            loadSosFeed();
+        })
+        .catch(() => alert('Failed to trigger SOS. Please try again.'));
+    });
+}
+
+function loadSosFeed() {
+    fetch('{% url "sos-feed" %}', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById('sosBeaconContainer');
+        if (!container) return;
+
+        const beacons = data.beacons || [];
+        if (!beacons.length) {
+            container.innerHTML = '<p class="text-muted mb-0">No active SOS beacons right now.</p>';
+            return;
+        }
+
+        let html = '<div class="table-responsive"><table class="table table-sm mb-0">';
+        html += '<thead><tr><th>ID</th><th>User</th><th>Status</th><th>Distance</th><th>Message</th><th>Action</th></tr></thead><tbody>';
+        beacons.forEach(function(item) {
+            const statusClass = item.status === 'open' ? 'danger' : (item.status === 'acknowledged' ? 'warning' : 'success');
+            const distanceText = (item.distance_km === null || item.distance_km === undefined) ? '-' : (item.distance_km + ' km');
+            html += '<tr>';
+            html += '<td>#' + item.id + '</td>';
+            html += '<td>' + item.triggered_by + '</td>';
+            html += '<td><span class="badge badge-' + statusClass + '">' + item.status + '</span></td>';
+            html += '<td>' + distanceText + '</td>';
+            html += '<td>' + item.message + '</td>';
+            html += '<td>';
+            {% if user.profile.is_ngo_or_admin or user.profile.is_volunteer %}
+            if (item.status === 'open') {
+                html += '<button class="btn btn-outline-warning btn-sm mr-1" onclick="ackSos(' + item.id + ', \'ack\')">Acknowledge</button>';
+            }
+            if (item.status !== 'resolved') {
+                html += '<button class="btn btn-outline-success btn-sm" onclick="ackSos(' + item.id + ', \'resolve\')">Resolve</button>';
+            }
+            {% else %}
+            html += '<small class="text-muted">' + (item.acknowledged_by ? ('By ' + item.acknowledged_by) : '-') + '</small>';
+            {% endif %}
+            html += '</td>';
+            html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+    })
+    .catch(function() {
+        const container = document.getElementById('sosBeaconContainer');
+        if (container) {
+            container.innerHTML = '<p class="text-danger mb-0">Unable to load SOS feed right now.</p>';
+        }
+    });
+}
+
+function ackSos(beaconId, action) {
+    const formData = new FormData();
+    formData.append('action', action);
+
+    const ackUrlTemplate = '{% url "sos-ack" 0 %}';
+    const ackUrl = ackUrlTemplate.replace('/0/ack/', '/' + beaconId + '/ack/');
+
+    fetch(ackUrl, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': getCsrfToken() },
+        body: formData,
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Request failed: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.error || 'Unable to update beacon status.');
+        }
+        loadSosFeed();
+    })
+    .catch((error) => alert(error.message || 'Unable to update beacon status.'));
+}
+
+function loadGeolocationServices() {
+    fetch('{% url "geo-services" %}', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        const container = document.getElementById('geoServicesContainer');
+        if (!container) return;
+
+        if (data.needs_location) {
+            container.innerHTML = '<p class="text-warning mb-0">Location not available yet. Share browser location to get ranked nearby services.</p>';
+            return;
+        }
+
+        let html = '';
+        html += '<div class="row">';
+
+        html += '<div class="col-md-4"><h6>Nearest Services</h6>';
+        if (data.services && data.services.length) {
+            data.services.forEach(function(item) {
+                html += '<div class="mb-2"><strong>' + item.name + '</strong> <span class="badge badge-light">' + item.distance_km + ' km</span><br><small>' + (item.detail || 'N/A') + '</small></div>';
+            });
+        } else {
+            html += '<p class="text-muted">No nearby services found.</p>';
+        }
+        html += '</div>';
+
+        html += '<div class="col-md-4"><h6>Prioritized Resources</h6>';
+        if (data.resources && data.resources.length) {
+            data.resources.forEach(function(item) {
+                html += '<div class="mb-2"><strong>' + item.resource + '</strong> - ' + item.quantity + ' ' + item.unit + '<br><small>' + item.ngo + ' | ' + item.distance_km + ' km | score ' + item.priority_score + '</small></div>';
+            });
+        } else {
+            html += '<p class="text-muted">No resources found nearby.</p>';
+        }
+        html += '</div>';
+
+        html += '<div class="col-md-4"><h6>Reach-Priority Crisis List</h6>';
+        if (data.requests && data.requests.length) {
+            data.requests.forEach(function(item) {
+                html += '<div class="mb-2"><strong>Request #' + item.id + '</strong> <span class="badge badge-danger">' + item.urgency + '</span><br><small>' + item.distance_km + ' km | reach score ' + item.reach_score + '</small></div>';
+            });
+        } else {
+            html += '<p class="text-muted">No active requests in range.</p>';
+        }
+        html += '</div>';
+
+        html += '</div>';
+        container.innerHTML = html;
+    })
+    .catch(function() {
+        const container = document.getElementById('geoServicesContainer');
+        if (container) {
+            container.innerHTML = '<p class="text-danger mb-0">Unable to load geolocation services right now.</p>';
+        }
+    });
+}
+{% endif %}
+</script>
+
+<style>
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+.jumbotron {
+    border-radius: 10px;
+}
+</style>
+{% endblock %}

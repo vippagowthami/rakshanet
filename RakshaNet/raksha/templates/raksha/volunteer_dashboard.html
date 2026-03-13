@@ -1,0 +1,363 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Volunteer Dashboard" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-success">
+                <i class="fas fa-hands-helping"></i> {% trans "Volunteer Dashboard" %}
+            </h2>
+            <p class="text-muted">{% trans "Welcome back" %}, {{ user.get_full_name|default:user.username }}!</p>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                {% trans "Pending Assignments" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ pending_assignments.count }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tasks fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                {% trans "Active Assignments" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ active_assignments.count }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-running fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                {% trans "Completed Tasks" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ completed_count }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                {% trans "Total Hours" %}
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ total_hours }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Volunteer Assistant -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card border-info shadow h-100">
+                <div class="card-header bg-info text-white">
+                    <h6 class="m-0 font-weight-bold"><i class="fas fa-robot"></i> {% trans "AI Insights" %}</h6>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        {% for insight in ai_insights %}
+                            <li>{{ insight }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-primary shadow h-100">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold"><i class="fas fa-crosshairs"></i> {% trans "AI Suggested Nearby Requests" %}</h6>
+                </div>
+                <div class="card-body">
+                    {% if ai_suggested_requests %}
+                        {% for item in ai_suggested_requests %}
+                            <div class="mb-2 pb-2 border-bottom">
+                                <strong>#{{ item.request.id }}</strong>
+                                <span class="badge badge-warning">{{ item.request.get_urgency_display }}</span>
+                                <br>
+                                <small>{% trans "Distance" %}: {{ item.distance_km }} km | {% trans "Fit Score" %}: {{ item.fit_score }}</small>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted mb-0">{% trans "Enable profile location to get AI nearby suggestions." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Pending Assignments -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-warning text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-bell"></i> {% trans "Pending Assignments" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if pending_assignments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "Crisis Request" %}</th>
+                                        <th>{% trans "Location" %}</th>
+                                        <th>{% trans "Assigned At" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for assignment in pending_assignments %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ assignment.request.disaster_type.name }}</strong><br>
+                                                <small class="text-muted">{{ assignment.request.description|truncatewords:10 }}</small>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-map-marker-alt text-danger"></i>
+                                                {{ assignment.request.address|truncatewords:5 }}
+                                            </td>
+                                            <td>
+                                                <small>{{ assignment.assigned_at|date:"M d, Y H:i" }}</small>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'volunteer-assignment-details' assignment.id %}" 
+                                                   class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> {% trans "View" %}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-3x mb-3"></i><br>
+                            {% trans "No pending assignments at the moment." %}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Active Assignments -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-success text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-fire"></i> {% trans "Active Assignments" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if active_assignments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "Crisis Request" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "Started At" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for assignment in active_assignments %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ assignment.request.disaster_type.name }}</strong><br>
+                                                <small class="text-muted">{{ assignment.request.description|truncatewords:10 }}</small>
+                                            </td>
+                                            <td>
+                                                {% if assignment.status == 'accepted' %}
+                                                    <span class="badge badge-info">{% trans "Accepted" %}</span>
+                                                {% elif assignment.status == 'in_progress' %}
+                                                    <span class="badge badge-primary">{% trans "In Progress" %}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <small>{{ assignment.started_at|date:"M d, Y H:i"|default:"Not started" }}</small>
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'volunteer-update-assignment' assignment.id %}" 
+                                                   class="btn btn-sm btn-primary">
+                                                    <i class="fas fa-edit"></i> {% trans "Update" %}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted py-4">
+                            <i class="fas fa-clipboard-list fa-3x mb-3"></i><br>
+                            {% trans "No active assignments. Check pending assignments or nearby requests." %}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-lg-4">
+            <!-- Profile Card -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-success text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-user"></i> {% trans "Your Profile" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <i class="fas fa-user-circle fa-5x text-success"></i>
+                        <h5 class="mt-2">{{ user.get_full_name|default:user.username }}</h5>
+                        <p class="text-muted">{{ volunteer_profile.get_primary_skill_display }}</p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>{% trans "Rating:" %}</strong>
+                        <div class="text-warning">
+                            {% if rating > 0 %}
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="text-muted">({{ rating|floatformat:1 }})</span>
+                            {% else %}
+                                <span class="text-muted">{% trans "No ratings yet" %}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>{% trans "Availability:" %}</strong>
+                        {% if volunteer_profile.available %}
+                            <span class="badge badge-success">{% trans "Available" %}</span>
+                        {% else %}
+                            <span class="badge badge-secondary">{% trans "Unavailable" %}</span>
+                        {% endif %}
+                    </div>
+
+                    <a href="{% url 'volunteer-profile-setup' %}" class="btn btn-primary btn-block">
+                        <i class="fas fa-edit"></i> {% trans "Edit Profile" %}
+                    </a>
+                    <a href="{% url 'volunteer-history' %}" class="btn btn-info btn-block">
+                        <i class="fas fa-history"></i> {% trans "View History" %}
+                    </a>
+                </div>
+            </div>
+
+            <!-- Emergency Alerts -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-exclamation-triangle"></i> {% trans "Active Alerts" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if active_alerts %}
+                        {% for alert in active_alerts %}
+                            <div class="alert alert-danger mb-2">
+                                <strong>{{ alert.disaster_type.name }}</strong><br>
+                                <small>{{ alert.affected_area }}</small><br>
+                                <small class="text-muted">{{ alert.created_at|date:"M d, Y H:i" }}</small>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-center text-muted">
+                            {% trans "No active alerts." %}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Nearby Requests -->
+            {% if nearby_requests %}
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-info text-white">
+                    <h6 class="m-0 font-weight-bold">
+                        <i class="fas fa-map-marked-alt"></i> {% trans "Nearby Requests" %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for request in nearby_requests %}
+                        <div class="border-bottom pb-2 mb-2">
+                            <strong>{{ request.disaster_type.name }}</strong><br>
+                            <small>{{ request.address|truncatewords:5 }}</small><br>
+                            <small class="text-muted">{{ request.created_at|date:"M d, Y" }}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

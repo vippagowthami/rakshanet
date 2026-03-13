@@ -1,0 +1,266 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Manage Requests" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-clipboard-list"></i> {% trans "Manage Crisis Requests" %}</h2>
+                <a href="{% url 'ngo-dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                </a>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-md-2">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-list"></i> {% trans "Total" %}</h5>
+                            <h2 class="mb-0">{{ stats.total }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-white bg-danger">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-bell"></i> {% trans "New" %}</h5>
+                            <h2 class="mb-0">{{ stats.unassigned }}</h2>
+                            <small>{% trans "Unassigned" %}</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-white bg-secondary">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-folder"></i> {% trans "Assigned" %}</h5>
+                            <h2 class="mb-0">{{ stats.assigned }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-clock"></i> {% trans "Pending" %}</h5>
+                            <h2 class="mb-0">{{ stats.pending }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-white bg-info">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-spinner"></i> {% trans "Active" %}</h5>
+                            <h2 class="mb-0">{{ stats.in_progress }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-white bg-success">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fas fa-check-circle"></i> {% trans "Done" %}</h5>
+                            <h2 class="mb-0">{{ stats.completed }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Options -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-filter"></i> {% trans "Filter Requests" %}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="form-inline">
+                        <div class="form-group mr-3">
+                            <label for="view-filter" class="mr-2">{% trans "View:" %}</label>
+                            <select name="view" id="view-filter" class="form-control" onchange="this.form.submit()">
+                                <option value="all" {% if view_filter == 'all' %}selected{% endif %}>{% trans "All Requests" %}</option>
+                                <option value="unassigned" {% if view_filter == 'unassigned' %}selected{% endif %}>{% trans "NEW - Unassigned" %} ({{ stats.unassigned }})</option>
+                                <option value="assigned" {% if view_filter == 'assigned' %}selected{% endif %}>{% trans "Assigned to Us" %} ({{ stats.assigned }})</option>
+                            </select>
+                        </div>
+                        <div class="form-group mr-3">
+                            <label for="status-filter" class="mr-2">{% trans "Status:" %}</label>
+                            <select name="status" id="status-filter" class="form-control" onchange="this.form.submit()">
+                                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>{% trans "All" %}</option>
+                                <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>{% trans "Submitted" %}</option>
+                                <option value="verified" {% if status_filter == 'verified' %}selected{% endif %}>{% trans "Verified" %}</option>
+                                <option value="approved" {% if status_filter == 'approved' %}selected{% endif %}>{% trans "Approved" %}</option>
+                                <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>{% trans "In Progress" %}</option>
+                                <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>{% trans "Completed" %}</option>
+                                <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>{% trans "Cancelled" %}</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Requests Table -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-table"></i> {% trans "Crisis Requests" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% if requests %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "ID" %}</th>
+                                        <th>{% trans "Reporter" %}</th>
+                                        <th>{% trans "Disaster Type" %}</th>
+                                        <th>{% trans "Location" %}</th>
+                                        <th>{% trans "Urgency" %}</th>
+                                        <th>{% trans "People Affected" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "Date" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for request in requests %}
+                                        <tr>
+                                            <td><strong>#{{ request.id }}</strong></td>
+                                            <td>
+                                                {% if request.reporter %}
+                                                    {{ request.reporter.get_full_name|default:request.reporter.username }}
+                                                {% else %}
+                                                    {{ request.name|default:"Anonymous" }}
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if request.disaster_type %}
+                                                    <span class="badge badge-secondary">
+                                                        {{ request.disaster_type.name }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="text-muted">N/A</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ request.address|truncatewords:5 }}</td>
+                                            <td>
+                                                {% if request.urgency == 'critical' %}
+                                                    <span class="badge badge-danger">{% trans "Critical" %}</span>
+                                                {% elif request.urgency == 'high' %}
+                                                    <span class="badge badge-warning">{% trans "High" %}</span>
+                                                {% elif request.urgency == 'medium' %}
+                                                    <span class="badge badge-info">{% trans "Medium" %}</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary">{% trans "Low" %}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ request.people_affected }}</td>
+                                            <td>
+                                                {% if request.status == 'completed' %}
+                                                    <span class="badge badge-success">{{ request.get_status_display }}</span>
+                                                {% elif request.status == 'cancelled' %}
+                                                    <span class="badge badge-dark">{{ request.get_status_display }}</span>
+                                                {% elif request.status == 'in_progress' %}
+                                                    <span class="badge badge-info">{{ request.get_status_display }}</span>
+                                                {% else %}
+                                                    <span class="badge badge-warning">{{ request.get_status_display }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ request.created_at|date:"M d, Y" }}</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'view-crisis-request' request.id %}" class="btn btn-sm btn-info" title="{% trans 'View' %}">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    {% if request.assigned_ngo is None %}
+                                                        <button type="button" class="btn btn-sm btn-success" onclick="claimRequest({{ request.id }}, '{{ request.id }}')" title="{% trans 'Claim Request' %}">
+                                                            <i class="fas fa-check-double"></i> {% trans "Claim" %}
+                                                        </button>
+                                                    {% else %}
+                                                        <a href="{% url 'ngo-edit-request' request.id %}" class="btn btn-sm btn-warning" title="{% trans 'Edit' %}">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                    {% if not request.is_verified %}
+                                                        <a href="{% url 'ngo-verify-request' request.id %}" class="btn btn-sm btn-success" title="{% trans 'Verify' %}">
+                                                            <i class="fas fa-check"></i> {% trans "Verify" %}
+                                                        </a>
+                                                    {% endif %}
+                                                    <a href="{% url 'ngo-create-assignment' %}?request={{ request.id }}" class="btn btn-sm btn-primary" title="{% trans 'Assign Volunteer' %}">
+                                                        <i class="fas fa-user-plus"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if requests.has_other_pages %}
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    {% if requests.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ requests.previous_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}">{% trans "Previous" %}</a>
+                                        </li>
+                                    {% endif %}
+
+                                    {% for num in requests.paginator.page_range %}
+                                        {% if requests.number == num %}
+                                            <li class="page-item active">
+                                                <span class="page-link">{{ num }}</span>
+                                            </li>
+                                        {% elif num > requests.number|add:'-3' and num < requests.number|add:'3' %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if requests.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ requests.next_page_number }}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}">{% trans "Next" %}</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <p class="lead">{% trans "No requests found" %}</p>
+                            <p class="text-muted">
+                                {% if status_filter != 'all' %}
+                                    {% trans "Try changing the filter above" %}
+                                {% else %}
+                                    {% trans "Crisis requests assigned to your organization will appear here" %}
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function claimRequest(requestId, requestNum) {
+    if (confirm('{% trans "Are you sure you want to claim crisis request #" %}' + requestNum + '? {% trans "This will assign it to your organization." %}')) {
+        window.location.href = "{% url 'ngo-claim-request' 0 %}".replace('0', requestId);
+    }
+}
+</script>
+{% endblock %}

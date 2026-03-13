@@ -1,0 +1,196 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+
+{% block title %}{% if is_edit %}{% trans "Edit Crisis Request" %}{% else %}{% trans "Create Crisis Request" %}{% endif %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="dashboard-card p-4">
+            <h2>
+                <i class="fas fa-exclamation-triangle"></i>
+                {% if is_edit %}
+                    {% trans "Edit Crisis Request" %}
+                {% else %}
+                    {% trans "Create Crisis Request" %}
+                {% endif %}
+            </h2>
+            <hr>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="{{ form.disaster_type.id_for_label }}">{% trans "Disaster Type" %}</label>
+                    {{ form.disaster_type }}
+                    {% if form.disaster_type.errors %}
+                        <div class="text-danger">{{ form.disaster_type.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.name.id_for_label }}">{% trans "Your Name" %}</label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div class="text-danger">{{ form.name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.phone.id_for_label }}">{% trans "Phone Number" %} *</label>
+                        {{ form.phone }}
+                        {% if form.phone.errors %}
+                            <div class="text-danger">{{ form.phone.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.description.id_for_label }}">{% trans "Description" %} *</label>
+                    {{ form.description }}
+                    <small class="form-text text-muted">{% trans "Describe the emergency situation in detail" %}</small>
+                    {% if form.description.errors %}
+                        <div class="text-danger">{{ form.description.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.address.id_for_label }}">{% trans "Address" %} *</label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                        <div class="text-danger">{{ form.address.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.latitude.id_for_label }}">{% trans "Latitude" %}</label>
+                        {{ form.latitude }}
+                        <small class="form-text text-muted">{% trans "Optional: GPS coordinates" %}</small>
+                        {% if form.latitude.errors %}
+                            <div class="text-danger">{{ form.latitude.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.longitude.id_for_label }}">{% trans "Longitude" %}</label>
+                        {{ form.longitude }}
+                        <small class="form-text text-muted">{% trans "Optional: GPS coordinates" %}</small>
+                        {% if form.longitude.errors %}
+                            <div class="text-danger">{{ form.longitude.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.resources_required.id_for_label }}">{% trans "Resources Required" %}</label>
+                    {{ form.resources_required }}
+                    {% if form.resources_required.errors %}
+                        <div class="text-danger">{{ form.resources_required.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.people_affected.id_for_label }}">{% trans "People Affected" %}</label>
+                        {{ form.people_affected }}
+                        {% if form.people_affected.errors %}
+                            <div class="text-danger">{{ form.people_affected.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="{{ form.urgency.id_for_label }}">{% trans "Urgency Level" %} *</label>
+                        {{ form.urgency }}
+                        {% if form.urgency.errors %}
+                            <div class="text-danger">{{ form.urgency.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.image.id_for_label }}">{% trans "Upload Image" %}</label>
+                    {{ form.image }}
+                    <small class="form-text text-muted">{% trans "Upload an image showing the situation" %}</small>
+                    {% if form.image.errors %}
+                        <div class="text-danger">{{ form.image.errors }}</div>
+                    {% endif %}
+                    {% if crisis_request and crisis_request.image %}
+                        <div class="mt-2">
+                            <img src="{{ crisis_request.image.url }}" alt="Current image" style="max-width: 200px;">
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.video_url.id_for_label }}">{% trans "Video URL (Optional)" %}</label>
+                    {{ form.video_url }}
+                    <small class="form-text text-muted">{% trans "Link to YouTube or other video documenting the situation" %}</small>
+                    {% if form.video_url.errors %}
+                        <div class="text-danger">{{ form.video_url.errors }}</div>
+                    {% endif %}
+                    {% if crisis_request and crisis_request.video_url %}
+                        <div class="mt-2">
+                            <a href="{{ crisis_request.video_url }}" target="_blank" class="btn btn-sm btn-info">
+                                <i class="fas fa-external-link-alt"></i> {% trans "View Video" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <hr>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save"></i>
+                        {% if is_edit %}
+                            {% trans "Update Request" %}
+                        {% else %}
+                            {% trans "Submit Request" %}
+                        {% endif %}
+                    </button>
+                    <a href="{% url 'user-dashboard' %}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-times"></i> {% trans "Cancel" %}
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Get current location
+document.addEventListener('DOMContentLoaded', function() {
+    const getLocationBtn = document.createElement('button');
+    getLocationBtn.type = 'button';
+    getLocationBtn.className = 'btn btn-sm btn-info mb-2';
+    getLocationBtn.innerHTML = '<i class="fas fa-map-marker-alt"></i> {% trans "Get Current Location" %}';
+    
+    const latInput = document.getElementById('{{ form.latitude.id_for_label }}');
+    const lngInput = document.getElementById('{{ form.longitude.id_for_label }}');
+    
+    if (latInput && lngInput) {
+        latInput.parentElement.insertBefore(getLocationBtn, latInput);
+        
+        getLocationBtn.addEventListener('click', function() {
+            if (navigator.geolocation) {
+                getLocationBtn.disabled = true;
+                getLocationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {% trans "Getting location..." %}';
+                
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    latInput.value = position.coords.latitude.toFixed(6);
+                    lngInput.value = position.coords.longitude.toFixed(6);
+                    getLocationBtn.disabled = false;
+                    getLocationBtn.innerHTML = '<i class="fas fa-check"></i> {% trans "Location set!" %}';
+                    getLocationBtn.className = 'btn btn-sm btn-success mb-2';
+                }, function(error) {
+                    alert('{% trans "Could not get location. Please enter manually." %}');
+                    getLocationBtn.disabled = false;
+                    getLocationBtn.innerHTML = '<i class="fas fa-map-marker-alt"></i> {% trans "Get Current Location" %}';
+                });
+            } else {
+                alert('{% trans "Geolocation is not supported by your browser" %}');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

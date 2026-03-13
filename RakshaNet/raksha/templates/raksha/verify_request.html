@@ -1,0 +1,335 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}{% trans "Verify Crisis Request" %} - RakshaNet{% endblock %}
+
+{% block extra_css %}
+<style>
+    .request-detail-card {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+    .detail-label {
+        font-weight: 600;
+        color: #333;
+        min-width: 150px;
+    }
+    .detail-value {
+        color: #666;
+        flex: 1;
+    }
+    .badge-custom {
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+    .disaster-badge {
+        background: #f8d7da;
+        color: #721c24;
+    }
+    .urgency-critical {
+        background: #f5222d;
+        color: white;
+    }
+    .urgency-high {
+        background: #ff7a45;
+        color: white;
+    }
+    .urgency-medium {
+        background: #faad14;
+        color: white;
+    }
+    .urgency-low {
+        background: #13c2c2;
+        color: white;
+    }
+    .form-section {
+        background: white;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .radio-group {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-check-circle"></i> {% trans "Verify Crisis Request" %}</h2>
+            <p class="text-muted">{% trans "Review and verify the crisis request details" %}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Request Details -->
+            <div class="request-detail-card">
+                <h4 class="mb-3">
+                    <i class="fas fa-exclamation-triangle"></i> {% trans "Request Details" %}
+                </h4>
+                <hr>
+
+                <div class="detail-row">
+                    <div class="detail-label">{% trans "Request ID:" %}</div>
+                    <div class="detail-value"><strong>#{{ request.id }}</strong></div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">{% trans "Status:" %}</div>
+                    <div class="detail-value">
+                        <span class="badge badge-secondary">{{ request.get_status_display }}</span>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">{% trans "Disaster Type:" %}</div>
+                    <div class="detail-value">
+                        {% if request.disaster_type %}
+                            <span class="badge badge-custom disaster-badge">
+                                {{ request.disaster_type.name }}
+                            </span>
+                        {% else %}
+                            <span class="text-muted">{% trans "Not specified" %}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">{% trans "Urgency:" %}</div>
+                    <div class="detail-value">
+                        <span class="badge badge-custom urgency-{{ request.urgency }}">
+                            {{ request.get_urgency_display }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">{% trans "People Affected:" %}</div>
+                    <div class="detail-value"><strong>{{ request.people_affected }}</strong></div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">{% trans "Reporter:" %}</div>
+                    <div class="detail-value">
+                        {% if request.reporter %}
+                            <i class="fas fa-user-circle"></i> {{ request.reporter.get_full_name|default:request.reporter.username }}
+                        {% else %}
+                            <span class="text-muted">{% trans "Anonymous" %}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">{% trans "Contact:" %}</div>
+                    <div class="detail-value">
+                        {% if request.phone %}
+                            <i class="fas fa-phone"></i> {{ request.phone }}
+                        {% else %}
+                            <span class="text-muted">{% trans "Not provided" %}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">{% trans "Location:" %}</div>
+                    <div class="detail-value">
+                        {% if request.address %}
+                            <i class="fas fa-map-marker-alt"></i> {{ request.address }}
+                        {% else %}
+                            <span class="text-muted">{% trans "Not specified" %}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">{% trans "Description:" %}</div>
+                    <div class="detail-value">
+                        {% if request.description %}
+                            {{ request.description|truncatewords:50 }}
+                        {% else %}
+                            <span class="text-muted">{% trans "No description" %}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">{% trans "Resources Needed:" %}</div>
+                    <div class="detail-value">
+                        {% if request.resources_required %}
+                            {{ request.resources_required }}
+                        {% else %}
+                            <span class="text-muted">{% trans "Not specified" %}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-label">{% trans "Submitted:" %}</div>
+                    <div class="detail-value">
+                        {{ request.created_at|date:"M d, Y H:i" }}
+                    </div>
+                </div>
+
+                {% if request.image %}
+                <div class="detail-row">
+                    <div class="detail-label">{% trans "Attached Image:" %}</div>
+                    <div class="detail-value">
+                        <a href="{{ request.image.url }}" target="_blank" class="text-primary">
+                            <i class="fas fa-image"></i> {% trans "View Image" %}
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Verification Form -->
+            <div class="form-section">
+                <h4 class="mb-3">
+                    <i class="fas fa-edit"></i> {% trans "Verification Action" %}
+                </h4>
+                <hr>
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <!-- Action Selection -->
+                    <div class="form-group">
+                        <label class="font-weight-bold">
+                            <i class="fas fa-tasks"></i> {% trans "Select Action:" %}
+                        </label>
+                        <div class="radio-group">
+                            {% for value, label in form.action.field.choices %}
+                            <div class="custom-control custom-radio">
+                                <input type="radio" class="custom-control-input" id="action_{{ value }}" 
+                                       name="action" value="{{ value }}" required>
+                                <label class="custom-control-label" for="action_{{ value }}">
+                                    {% if value == 'verify' %}
+                                        <i class="fas fa-check text-success"></i> {{ label }}
+                                    {% else %}
+                                        <i class="fas fa-times text-danger"></i> {{ label }}
+                                    {% endif %}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Assign NGO -->
+                    <div class="form-group">
+                        <label for="{{ form.assigned_ngo.id_for_label }}" class="font-weight-bold">
+                            <i class="fas fa-building"></i> {% trans "Assign to NGO (Optional):" %}
+                        </label>
+                        {{ form.assigned_ngo }}
+                        <small class="form-text text-muted">
+                            {% trans "Select an NGO to handle this crisis request" %}
+                        </small>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="form-group">
+                        <label for="{{ form.notes.id_for_label }}" class="font-weight-bold">
+                            <i class="fas fa-comment"></i> {% trans "Notes (Optional):" %}
+                        </label>
+                        {{ form.notes }}
+                        <small class="form-text text-muted">
+                            {% trans "Add any internal notes about this request" %}
+                        </small>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-save"></i> {% trans "Submit Verification" %}
+                        </button>
+                        <a href="{% url 'ngo-dashboard' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> {% trans "Cancel" %}
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar Info -->
+        <div class="col-lg-4">
+            <div class="request-detail-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-info-circle"></i> {% trans "Verification Info" %}
+                </h5>
+                <hr>
+
+                <div class="alert alert-info">
+                    <strong>{% trans "What is verification?" %}</strong>
+                    <p class="mb-0 mt-2">
+                        {% trans "Verification confirms that this crisis request is legitimate and requires immediate attention. Verified requests will be visible to all NGOs for assignment." %}
+                    </p>
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong>{% trans "Before Verifying:" %}</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>{% trans "Check reporter credibility" %}</li>
+                        <li>{% trans "Confirm location accuracy" %}</li>
+                        <li>{% trans "Verify people count" %}</li>
+                        <li>{% trans "Assess urgency level" %}</li>
+                    </ul>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>{% trans "After Verification:" %}</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>{% trans "Request becomes visible to NGOs" %}</li>
+                        <li>{% trans "Can be assigned to organization" %}</li>
+                        <li>{% trans "Volunteers can be allocated" %}</li>
+                        <li>{% trans "Donations can be tracked" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toggle form based on action selection
+    document.querySelectorAll('input[name="action"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const notesField = document.querySelector('textarea[name="notes"]');
+            const ngoField = document.querySelector('select[name="assigned_ngo"]');
+            
+            if (this.value === 'reject') {
+                notesField.placeholder = '{% trans "Reason for rejection (required)" %}';
+            } else {
+                notesField.placeholder = '{% trans "Add notes (optional)" %}';
+            }
+        });
+    });
+</script>
+{% endblock %}

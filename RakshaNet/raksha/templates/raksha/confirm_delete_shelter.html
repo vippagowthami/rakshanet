@@ -1,0 +1,66 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Delete Shelter" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> {% trans "Confirm Deletion" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h5><i class="fas fa-warning"></i> {% trans "Warning!" %}</h5>
+                        <p>{% trans "You are about to delete the following shelter. This action cannot be undone." %}</p>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ shelter.name }}</h5>
+                            <p class="card-text">
+                                <i class="fas fa-map-marker-alt"></i> <strong>{% trans "Location:" %}</strong> {{ shelter.location }}<br>
+                                <i class="fas fa-users"></i> <strong>{% trans "Capacity:" %}</strong> {{ shelter.capacity }} people<br>
+                                <i class="fas fa-user-friends"></i> <strong>{% trans "Current Occupancy:" %}</strong> {{ shelter.current_occupancy }}<br>
+                                <span class="badge badge-{% if shelter.status == 'active' %}success{% elif shelter.status == 'full' %}warning{% else %}secondary{% endif %}">
+                                    {{ shelter.get_status_display }}
+                                </span>
+                            </p>
+                            {% if shelter.facilities %}
+                                <p><strong>{% trans "Facilities:" %}</strong><br>
+                                    <small>{{ shelter.facilities|truncatechars:100 }}</small>
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if shelter.current_occupancy > 0 %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <strong>{% trans "Notice:" %}</strong>
+                            {% trans "This shelter currently has" %} {{ shelter.current_occupancy }} {% trans "people. Please ensure alternative arrangements before deletion." %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fas fa-trash"></i> {% trans "Yes, Delete Shelter" %}
+                            </button>
+                            <a href="{% url 'ngo-shelters' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> {% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

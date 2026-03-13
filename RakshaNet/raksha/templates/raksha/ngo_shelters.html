@@ -1,0 +1,198 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Manage Shelters" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-home"></i> {% trans "Manage Emergency Shelters" %}</h2>
+                <div>
+                    <a href="{% url 'ngo-create-shelter' %}" class="btn btn-success mr-2">
+                        <i class="fas fa-plus"></i> {% trans "Add New Shelter" %}
+                    </a>
+                    <a href="{% url 'ngo-dashboard' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> {% trans "Back to Dashboard" %}
+                    </a>
+                </div>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Shelters List -->
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i> {% trans "Shelter List" %}
+                        <span class="badge badge-light ml-2">{{ shelters.count }} {% trans "Total" %}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if shelters %}
+                        <div class="row">
+                            {% for shelter in shelters %}
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-header {% if shelter.available %}bg-success{% else %}bg-danger{% endif %} text-white">
+                                            <h5 class="mb-0">{{ shelter.name }}</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong><i class="fas fa-map-marker-alt"></i> {% trans "Location:" %}</strong></p>
+                                            <p class="text-muted">{{ shelter.address|truncatechars:80 }}</p>
+                                            
+                                            <div class="row mb-2">
+                                                <div class="col-6">
+                                                    <p class="mb-1"><strong>{% trans "Capacity:" %}</strong></p>
+                                                    <span class="badge badge-primary">{{ shelter.capacity }}</span>
+                                                </div>
+                                                <div class="col-6">
+                                                    <p class="mb-1"><strong>{% trans "Occupied:" %}</strong></p>
+                                                    <span class="badge badge-info">{{ shelter.current_occupancy }}</span>
+                                                </div>
+                                            </div>
+
+                                            {% if shelter.facilities %}
+                                                <p class="mb-1"><strong>{% trans "Facilities:" %}</strong></p>
+                                                <p class="text-muted small">{{ shelter.facilities|truncatechars:80 }}</p>
+                                            {% endif %}
+
+                                            <p class="mb-1"><strong>{% trans "Contact:" %}</strong></p>
+                                            <p class="text-muted">
+                                                <i class="fas fa-phone"></i> {{ shelter.contact_number }}<br>
+                                                {% if shelter.managed_by and shelter.managed_by.contact_person %}
+                                                    <i class="fas fa-user"></i> {{ shelter.managed_by.contact_person }}
+                                                {% endif %}
+                                            </p>
+
+                                            <div class="progress mb-2" style="height: 25px;">
+                                                {% widthratio shelter.current_occupancy shelter.capacity 100 as occupancy_percentage %}
+                                                <div class="progress-bar {% if occupancy_percentage >= 90 %}bg-danger{% elif occupancy_percentage >= 70 %}bg-warning{% else %}bg-success{% endif %}" 
+                                                     role="progressbar" 
+                                                     style="width: {{ occupancy_percentage }}%;" 
+                                                     aria-valuenow="{{ occupancy_percentage }}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100">
+                                                    {{ occupancy_percentage }}% {% trans "Full" %}
+                                                </div>
+                                            </div>
+
+                                            <p class="mb-0">
+                                                <strong>{% trans "Status:" %}</strong>
+                                                {% if shelter.status == 'active' and shelter.current_occupancy < shelter.capacity %}
+                                                    <span class="badge badge-success">{% trans "Available" %}</span>
+                                                {% elif shelter.status == 'full' or shelter.current_occupancy >= shelter.capacity %}
+                                                    <span class="badge badge-danger">{% trans "Full" %}</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary">{% trans "Inactive" %}</span>
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                        <div class="card-footer bg-light">
+                                            <div class="btn-group btn-group-sm w-100" role="group">
+                                                <button class="btn btn-info" 
+                                                        data-toggle="modal" 
+                                                        data-target="#shelterModal{{ shelter.id }}">
+                                                    <i class="fas fa-eye"></i> {% trans "View" %}
+                                                </button>
+                                                <a href="{% url 'ngo-edit-shelter' shelter.id %}" class="btn btn-warning">
+                                                    <i class="fas fa-edit"></i> {% trans "Edit" %}
+                                                </a>
+                                                <a href="{% url 'ngo-delete-shelter' shelter.id %}" 
+                                                   class="btn btn-danger" 
+                                                   onclick="return confirm('{% trans 'Are you sure?' %}')">
+                                                    <i class="fas fa-trash"></i> {% trans "Delete" %}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Shelter Detail Modal -->
+                                <div class="modal fade" id="shelterModal{{ shelter.id }}" 
+                                     tabindex="-1" role="dialog" 
+                                     aria-labelledby="shelterModalLabel{{ shelter.id }}" 
+                                     aria-hidden="true">
+                                    <div class="modal-dialog modal-lg" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="shelterModalLabel{{ shelter.id }}">
+                                                    {{ shelter.name }}
+                                                </h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <p><strong>{% trans "Location:" %}</strong></p>
+                                                        <p>{{ shelter.address|truncatechars:120 }}</p>
+                                                        <p><strong>{% trans "Address:" %}</strong></p>
+                                                        <p>{{ shelter.address|default:"N/A" }}</p>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <p><strong>{% trans "Capacity:" %}</strong> {{ shelter.capacity }}</p>
+                                                        <p><strong>{% trans "Current Occupancy:" %}</strong> {{ shelter.current_occupancy }}</p>
+                                                        <p><strong>{% trans "Available:" %}</strong> 
+                                                            {% if shelter.status == 'active' and shelter.current_occupancy < shelter.capacity %}
+                                                                <span class="badge badge-success">{% trans "Yes" %}</span>
+                                                            {% else %}
+                                                                <span class="badge badge-danger">{% trans "No" %}</span>
+                                                            {% endif %}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <p><strong>{% trans "Contact Person:" %}</strong> {{ shelter.managed_by.contact_person|default:"N/A" }}</p>
+                                                        <p><strong>{% trans "Contact Number:" %}</strong> {{ shelter.contact_number }}</p>
+                                                        <p><strong>{% trans "Facilities:" %}</strong></p>
+                                                        <p>{{ shelter.facilities|default:"No facilities listed" }}</p>
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-12">
+                                                        <p><strong>{% trans "Created:" %}</strong> {{ shelter.created_at|date:"F d, Y H:i" }}</p>
+                                                        <p><strong>{% trans "Last Updated:" %}</strong> {{ shelter.updated_at|date:"F d, Y H:i" }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="{% url 'ngo-edit-shelter' shelter.id %}" class="btn btn-warning">
+                                                    <i class="fas fa-edit"></i> {% trans "Edit" %}
+                                                </a>
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                                                    {% trans "Close" %}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> {% trans "No shelters found." %}
+                            <a href="{% url 'ngo-create-shelter' %}" class="alert-link">{% trans "Create your first shelter" %}</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

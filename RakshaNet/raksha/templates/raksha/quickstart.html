@@ -1,0 +1,345 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Quick Start Guide" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="jumbotron bg-primary text-white">
+        <h1 class="display-4">
+            <i class="fas fa-rocket"></i> {% trans "RakshaNet Quick Start" %}
+        </h1>
+        <p class="lead">{% trans "Complete guide to get started with the disaster management system" %}</p>
+    </div>
+
+    <div class="row">
+        <!-- Step 1: Setup -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cogs"></i> {% trans "Step 1: Initial Setup" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ol>
+                        <li>{% trans "Ensure all requirements are installed" %}:
+                            <pre class="bg-light p-2">pip install -r requirements.txt</pre>
+                        </li>
+                        <li>{% trans "Create migrations" %}:
+                            <pre class="bg-light p-2">python manage.py makemigrations</pre>
+                        </li>
+                        <li>{% trans "Apply migrations" %}:
+                            <pre class="bg-light p-2">python manage.py migrate</pre>
+                        </li>
+                        <li>{% trans "Create superuser" %}:
+                            <pre class="bg-light p-2">python manage.py createsuperuser</pre>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Data Population -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-database"></i> {% trans "Step 2: Populate Data" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>{% trans "Load initial data (optional)" %}:</p>
+                    <pre class="bg-light p-2">python manage.py populate_initial_data</pre>
+                    <p class="mt-2">{% trans "This creates:" %}</p>
+                    <ul>
+                        <li>15 Disaster Types</li>
+                        <li>25 Resource Types</li>
+                        <li>10 Emergency Contacts</li>
+                        <li>50 Safety Tips</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Create Test Users -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users"></i> {% trans "Step 3: Create Test Users" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>{% trans "Create test users for each role:" %}</p>
+                    <div class="alert alert-light">
+                        <strong>{% trans "NGO/Admin:" %}</strong> role=1<br>
+                        <strong>{% trans "Volunteer:" %}</strong> role=2<br>
+                        <strong>{% trans "Common User:" %}</strong> role=3
+                    </div>
+                    <p class="small">{% trans "Use Django admin to create users, then assign roles via User Profile" %}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 4: Run Server -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-play"></i> {% trans "Step 4: Run Server" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p>{% trans "Start development server:" %}</p>
+                    <pre class="bg-light p-2">python manage.py runserver</pre>
+                    <p class="mt-2">{% trans "Available URLs:" %}</p>
+                    <ul class="small">
+                        <li>Home: http://127.0.0.1:8000/</li>
+                        <li>Admin: http://127.0.0.1:8000/admin/</li>
+                        <li>API: http://127.0.0.1:8000/raksha/api/</li>
+                        <li>Dashboard API: http://127.0.0.1:8000/raksha/api/dashboard/</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Features -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3 class="mb-3">
+                <i class="fas fa-star"></i> {% trans "Key Features Available" %}
+            </h3>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">{% trans "Crisis Management" %}</h6>
+                </div>
+                <div class="card-body small">
+                    <ul>
+                        <li>{% trans "Report crisis requests" %}</li>
+                        <li>{% trans "Track request status" %}</li>
+                        <li>{% trans "View assignments" %}</li>
+                        <li>{% trans "Manage donations" %}</li>
+                        <li>{% trans "Submit feedback" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">{% trans "Volunteer Management" %}</h6>
+                </div>
+                <div class="card-body small">
+                    <ul>
+                        <li>{% trans "Complete volunteer profiles" %}</li>
+                        <li>{% trans "Accept assignments" %}</li>
+                        <li>{% trans "Track hours" %}</li>
+                        <li>{% trans "View history" %}</li>
+                        <li>{% trans "Manage availability" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">{% trans "NGO Operations" %}</h6>
+                </div>
+                <div class="card-body small">
+                    <ul>
+                        <li>{% trans "Verify requests" %}</li>
+                        <li>{% trans "Create alerts" %}</li>
+                        <li>{% trans "Manage shelters" %}</li>
+                        <li>{% trans "Inventory tracking" %}</li>
+                        <li>{% trans "Volunteer assignments" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Endpoints -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-code"></i> {% trans "API Documentation" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>{% trans "Endpoint" %}</th>
+                                    <th>{% trans "Description" %}</th>
+                                    <th>{% trans "Method" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>/raksha/api/dashboard/</code></td>
+                                    <td>{% trans "User dashboard statistics" %}</td>
+                                    <td><span class="badge badge-primary">GET</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/raksha/api/requests/</code></td>
+                                    <td>{% trans "List/create crisis requests" %}</td>
+                                    <td><span class="badge badge-primary">GET</span> <span class="badge badge-success">POST</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/raksha/api/volunteers/</code></td>
+                                    <td>{% trans "List volunteers" %}</td>
+                                    <td><span class="badge badge-primary">GET</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/raksha/api/assignments/</code></td>
+                                    <td>{% trans "List/create assignments" %}</td>
+                                    <td><span class="badge badge-primary">GET</span> <span class="badge badge-success">POST</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/raksha/api/alerts/</code></td>
+                                    <td>{% trans "List emergency alerts" %}</td>
+                                    <td><span class="badge badge-primary">GET</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>/raksha/api/shelters/</code></td>
+                                    <td>{% trans "List shelters" %}</td>
+                                    <td><span class="badge badge-primary">GET</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Important URLs -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <h3 class="mb-3">
+                <i class="fas fa-map"></i> {% trans "Important URLs" %}
+            </h3>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="list-group">
+                <a href="/" class="list-group-item list-group-item-action">
+                    <strong>Home Page</strong><br>
+                    <small class="text-muted">/</small>
+                </a>
+                <a href="/user/dashboard/" class="list-group-item list-group-item-action">
+                    <strong>User Dashboard</strong><br>
+                    <small class="text-muted">/user/dashboard/</small>
+                </a>
+                <a href="/volunteer/dashboard/" class="list-group-item list-group-item-action">
+                    <strong>Volunteer Dashboard</strong><br>
+                    <small class="text-muted">/volunteer/dashboard/</small>
+                </a>
+                <a href="/ngo/dashboard/" class="list-group-item list-group-item-action">
+                    <strong>NGO Dashboard</strong><br>
+                    <small class="text-muted">/ngo/dashboard/</small>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="list-group">
+                <a href="/public/alerts/" class="list-group-item list-group-item-action">
+                    <strong>Emergency Alerts</strong><br>
+                    <small class="text-muted">/public/alerts/</small>
+                </a>
+                <a href="/public/shelters/" class="list-group-item list-group-item-action">
+                    <strong>Available Shelters</strong><br>
+                    <small class="text-muted">/public/shelters/</small>
+                </a>
+                <a href="/public/safety-tips/" class="list-group-item list-group-item-action">
+                    <strong>Safety Tips</strong><br>
+                    <small class="text-muted">/public/safety-tips/</small>
+                </a>
+                <a href="/public/emergency-contacts/" class="list-group-item list-group-item-action">
+                    <strong>Emergency Contacts</strong><br>
+                    <small class="text-muted">/public/emergency-contacts/</small>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle"></i> {% trans "Troubleshooting Tips" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="troubleshooting">
+                        <div class="card">
+                            <div class="card-header" id="heading1">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse1">
+                                        {% trans "Dashboard API Returns 401 Unauthorized" %}
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapse1" class="collapse" data-parent="#troubleshooting">
+                                <div class="card-body">
+                                    <p>{% trans "Solution: Make sure you are logged in. The dashboard API requires authentication." %}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="heading2">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse2">
+                                        {% trans "Database Migration Errors" %}
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapse2" class="collapse" data-parent="#troubleshooting">
+                                <div class="card-body">
+                                    <p>{% trans "Solution: Run these commands in order:" %}</p>
+                                    <pre class="bg-light p-2">python manage.py makemigrations
+python manage.py migrate</pre>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="heading3">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse3">
+                                        {% trans "Missing Static Files" %}
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapse3" class="collapse" data-parent="#troubleshooting">
+                                <div class="card-body">
+                                    <p>{% trans "Solution: Collect static files:" %}</p>
+                                    <pre class="bg-light p-2">python manage.py collectstatic --noinput</pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card { transition: transform 0.2s; }
+.card:hover { transform: translateY(-3px); }
+</style>
+{% endblock %}

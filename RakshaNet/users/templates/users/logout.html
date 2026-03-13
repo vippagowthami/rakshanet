@@ -1,0 +1,25 @@
+{% extends 'blog/base.html' %}
+{% block content %}
+<style>
+    h2{
+    margin-top: 100px;
+    margin-bottom: 20px;
+    text-shadow: -3px -3px 6px #00000060;
+}
+</style>
+
+        <h2>You have been logged out successfully</h2>
+        <p class="text-muted">Thank you for using RakshaNet. You have been logged out from your account.</p>
+            <div class = "border-top pt-3">
+                <small class="text-muted"> 
+                    <a href="{% url 'login' %}">Log in again</a> or <a href="{% url 'landing' %}">Go to Home</a>
+                </small>
+            </div>
+            
+<script>
+    // Auto-redirect after 3 seconds
+    setTimeout(function() {
+        window.location.href = "{% url 'landing' %}";
+    }, 3000);
+</script>
+{% endblock content%}

@@ -1,0 +1,63 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Confirm Delete Donation" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> {% trans "Confirm Delete" %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle"></i> 
+                        {% trans "Are you sure you want to delete this donation?" %}
+                    </div>
+
+                    <h5>{% trans "Donation Details:" %}</h5>
+                    <ul class="list-unstyled">
+                        <li><strong>{% trans "Type:" %}</strong> {{ donation.get_donation_type_display }}</li>
+                        {% if donation.amount %}
+                            <li><strong>{% trans "Amount:" %}</strong> ₹{{ donation.amount }}</li>
+                        {% endif %}
+                        {% if donation.request %}
+                            <li><strong>{% trans "Request:" %}</strong> #{{ donation.request.id }}</li>
+                        {% endif %}
+                        <li><strong>{% trans "Date:" %}</strong> {{ donation.created_at|date:"M d, Y H:i" }}</li>
+                    </ul>
+
+                    {% if donation.note %}
+                        <div class="mt-3">
+                            <strong>{% trans "Note:" %}</strong>
+                            <p>{{ donation.note }}</p>
+                        </div>
+                    {% endif %}
+
+                    <div class="alert alert-danger mt-3">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        {% trans "This action cannot be undone!" %}
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'donations' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> {% trans "Cancel" %}
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt"></i> {% trans "Yes, Delete" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

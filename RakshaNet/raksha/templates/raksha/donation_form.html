@@ -1,0 +1,151 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% if is_edit %}{% trans "Edit Donation" %}{% else %}{% trans "Create Donation" %}{% endif %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-donate"></i> 
+                        {% if is_edit %}
+                            {% trans "Edit Donation" %}
+                        {% else %}
+                            {% trans "Record New Donation" %}
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <strong>{% trans "Please correct the errors below:" %}</strong>
+                                <ul class="mb-0">
+                                    {% for field in form %}
+                                        {% for error in field.errors %}
+                                            <li>{{ field.label }}: {{ error }}</li>
+                                        {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label for="{{ form.donation_type.id_for_label }}">
+                                <i class="fas fa-tag"></i> {% trans "Donation Type" %} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.donation_type }}
+                            {% if form.donation_type.help_text %}
+                                <small class="form-text text-muted">{{ form.donation_type.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group" id="amount-field">
+                            <label for="{{ form.amount.id_for_label }}">
+                                <i class="fas fa-rupee-sign"></i> {% trans "Amount (₹)" %}
+                            </label>
+                            {{ form.amount }}
+                            {% if form.amount.help_text %}
+                                <small class="form-text text-muted">{{ form.amount.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.request.id_for_label }}">
+                                <i class="fas fa-hands-helping"></i> {% trans "Crisis Request (Optional)" %}
+                            </label>
+                            {{ form.request }}
+                            <small class="form-text text-muted">{% trans "Link this donation to a specific crisis request" %}</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.note.id_for_label }}">
+                                <i class="fas fa-sticky-note"></i> {% trans "Additional Notes" %}
+                            </label>
+                            {{ form.note }}
+                            {% if form.note.help_text %}
+                                <small class="form-text text-muted">{{ form.note.help_text }}</small>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.image.id_for_label }}">
+                                <i class="fas fa-image"></i> {% trans "Receipt/Proof (Image)" %}
+                            </label>
+                            {{ form.image }}
+                            {% if form.image.help_text %}
+                                <small class="form-text text-muted">{{ form.image.help_text }}</small>
+                            {% endif %}
+                            {% if is_edit and donation.image %}
+                                <div class="mt-2">
+                                    <p class="mb-1"><strong>{% trans "Current image:" %}</strong></p>
+                                    <img src="{{ donation.image.url }}" alt="Donation proof" class="img-thumbnail" style="max-width: 300px;">
+                                    <p class="text-muted small mt-1">{% trans "Upload a new image to replace the current one" %}</p>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'donations' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> {% trans "Cancel" %}
+                            </a>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save"></i> 
+                                {% if is_edit %}
+                                    {% trans "Update Donation" %}
+                                {% else %}
+                                    {% trans "Record Donation" %}
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if is_edit and donation %}
+                <div class="card mt-3">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0"><i class="fas fa-trash-alt"></i> {% trans "Danger Zone" %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>{% trans "Deleting this donation is permanent and cannot be undone." %}</p>
+                        <a href="{% url 'delete-donation' donation.id %}" class="btn btn-danger">
+                            <i class="fas fa-trash-alt"></i> {% trans "Delete Donation" %}
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Show/hide amount field based on donation type
+    document.getElementById('{{ form.donation_type.id_for_label }}').addEventListener('change', function() {
+        var amountField = document.getElementById('amount-field');
+        if (this.value === 'money') {
+            amountField.style.display = 'block';
+            document.getElementById('{{ form.amount.id_for_label }}').required = true;
+        } else {
+            amountField.style.display = 'none';
+            document.getElementById('{{ form.amount.id_for_label }}').required = false;
+        }
+    });
+    
+    // Trigger on page load
+    document.getElementById('{{ form.donation_type.id_for_label }}').dispatchEvent(new Event('change'));
+</script>
+{% endblock %}

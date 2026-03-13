@@ -1,0 +1,254 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Assignment Details" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'volunteer-dashboard' %}">{% trans "Dashboard" %}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'volunteer-history' %}">{% trans "History" %}</a></li>
+                    <li class="breadcrumb-item active">{% trans "Assignment Details" %}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Assignment Header -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h4 class="mb-0">
+                                <i class="fas fa-clipboard-check"></i> {% trans "Assignment" %} #{{ assignment.id }}
+                            </h4>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            {% if assignment.status == 'pending' %}
+                                <span class="badge badge-warning badge-pill p-2">{% trans "Pending" %}</span>
+                            {% elif assignment.status == 'accepted' %}
+                                <span class="badge badge-info badge-pill p-2">{% trans "Accepted" %}</span>
+                            {% elif assignment.status == 'in_progress' %}
+                                <span class="badge badge-primary badge-pill p-2">{% trans "In Progress" %}</span>
+                            {% elif assignment.status == 'completed' %}
+                                <span class="badge badge-success badge-pill p-2">{% trans "Completed" %}</span>
+                            {% elif assignment.status == 'cancelled' %}
+                                <span class="badge badge-danger badge-pill p-2">{% trans "Cancelled" %}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>{% trans "Assigned Date:" %}</strong> {{ assignment.assigned_at|date:"F d, Y H:i" }}</p>
+                            <p><strong>{% trans "Assigned NGO:" %}</strong> {{ assignment.request.assigned_ngo.organization_name|default:"N/A" }}</p>
+                            {% if assignment.started_at %}
+                                <p><strong>{% trans "Started:" %}</strong> {{ assignment.started_at|date:"F d, Y H:i" }}</p>
+                            {% endif %}
+                            {% if assignment.completed_at %}
+                                <p><strong>{% trans "Completed:" %}</strong> {{ assignment.completed_at|date:"F d, Y H:i" }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if assignment.hours_spent %}
+                                <p><strong>{% trans "Hours Spent:" %}</strong> <span class="badge badge-dark p-2">{{ assignment.hours_spent }} hours</span></p>
+                            {% endif %}
+                            {% if assignment.notes %}
+                                <p><strong>{% trans "Instructions:" %}</strong></p>
+                                <div class="alert alert-info">{{ assignment.notes }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crisis Request Details -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> {% trans "Crisis Request Details" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">{% trans "Disaster Type" %}</h6>
+                            <p class="lead">
+                                <span class="badge badge-danger p-2">
+                                    {{ assignment.request.disaster_type.name|default:"Emergency" }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">{% trans "Urgency Level" %}</h6>
+                            <p class="lead">
+                                {% if assignment.request.urgency == 'critical' %}
+                                    <span class="badge badge-danger badge-pill p-2">{% trans "Critical" %}</span>
+                                {% elif assignment.request.urgency == 'high' %}
+                                    <span class="badge badge-warning badge-pill p-2">{% trans "High" %}</span>
+                                {% elif assignment.request.urgency == 'medium' %}
+                                    <span class="badge badge-info badge-pill p-2">{% trans "Medium" %}</span>
+                                {% else %}
+                                    <span class="badge badge-secondary badge-pill p-2">{% trans "Low" %}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h6 class="text-primary"><i class="fas fa-map-marker-alt"></i> {% trans "Location" %}</h6>
+                    <p>{{ assignment.request.address|default:"Not specified" }}</p>
+                    {% if assignment.request.latitude and assignment.request.longitude %}
+                        <p>
+                            <small class="text-muted">
+                                {% trans "Coordinates:" %} {{ assignment.request.latitude }}, {{ assignment.request.longitude }}
+                            </small><br>
+                            <a href="https://www.google.com/maps?q={{ assignment.request.latitude }},{{ assignment.request.longitude }}" 
+                               target="_blank" 
+                               class="btn btn-sm btn-info">
+                                <i class="fas fa-map"></i> {% trans "Open in Google Maps" %}
+                            </a>
+                        </p>
+                    {% endif %}
+
+                    <hr>
+
+                    <h6 class="text-primary"><i class="fas fa-info-circle"></i> {% trans "Description" %}</h6>
+                    <p>{{ assignment.request.description }}</p>
+
+                    {% if assignment.request.people_affected %}
+                        <hr>
+                        <h6 class="text-primary"><i class="fas fa-users"></i> {% trans "People Affected" %}</h6>
+                        <p class="lead">{{ assignment.request.people_affected }} people</p>
+                    {% endif %}
+
+                    {% if assignment.request.resources_required %}
+                        <hr>
+                        <h6 class="text-primary"><i class="fas fa-box"></i> {% trans "Resource Requirements" %}</h6>
+                        <div class="alert alert-warning">
+                            {{ assignment.request.resources_required }}
+                        </div>
+                    {% endif %}
+
+                    {% if assignment.request.image %}
+                        <hr>
+                        <h6 class="text-primary"><i class="fas fa-image"></i> {% trans "Image" %}</h6>
+                        <img src="{{ assignment.request.image.url }}" 
+                             class="img-fluid rounded" 
+                             alt="Crisis Image"
+                             style="max-height: 400px;">
+                    {% endif %}
+
+                    <hr>
+                    <a href="{% url 'view-crisis-request' assignment.request.id %}" class="btn btn-outline-primary">
+                        <i class="fas fa-external-link-alt"></i> {% trans "View Crisis Details" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information Sidebar -->
+        <div class="col-md-4">
+            <div class="card shadow mb-4 border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-phone"></i> {% trans "Contact Information" %}</h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-primary">{% trans "Reporter" %}</h6>
+                    <p>
+                        <i class="fas fa-user"></i> {{ assignment.request.name|default:assignment.request.reporter.username }}<br>
+                        <i class="fas fa-phone"></i> {{ assignment.request.phone|default:"N/A" }}
+                    </p>
+
+                    <hr>
+
+                    <h6 class="text-primary">{% trans "NGO Coordinator" %}</h6>
+                    <p>
+                        <i class="fas fa-building"></i> {{ assignment.request.assigned_ngo.organization_name|default:"N/A" }}<br>
+                        <i class="fas fa-phone"></i> {{ assignment.request.assigned_ngo.phone|default:"N/A" }}<br>
+                        <i class="fas fa-envelope"></i> {{ assignment.request.assigned_ngo.email|default:"N/A" }}
+                    </p>
+
+                    <div class="alert alert-warning mt-3">
+                        <small>
+                            <i class="fas fa-exclamation-triangle"></i>
+                            {% trans "Please contact the NGO coordinator if you need any assistance or have questions about this assignment." %}
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-cog"></i> {% trans "Actions" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% if assignment.status == 'pending' %}
+                        <form method="post" action="{% url 'volunteer-accept-assignment' assignment.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-block" onclick="return confirm('{% trans 'Accept this assignment?' %}')">
+                                <i class="fas fa-check"></i> {% trans "Accept Assignment" %}
+                            </button>
+                        </form>
+                        <button class="btn btn-danger btn-block mt-2" onclick="alert('{% trans 'Contact NGO to decline' %}')">
+                            <i class="fas fa-times"></i> {% trans "Decline" %}
+                        </button>
+                    {% elif assignment.status == 'accepted' or assignment.status == 'in_progress' %}
+                        <a href="{% url 'volunteer-update-assignment' assignment.id %}" class="btn btn-primary btn-block">
+                            <i class="fas fa-edit"></i> {% trans "Update Status" %}
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'volunteer-history' %}" class="btn btn-secondary btn-block">
+                        <i class="fas fa-arrow-left"></i> {% trans "Back to History" %}
+                    </a>
+                    <a href="{% url 'volunteer-dashboard' %}" class="btn btn-info btn-block">
+                        <i class="fas fa-home"></i> {% trans "Dashboard" %}
+                    </a>
+                </div>
+            </div>
+
+            <!-- Status Timeline -->
+            <div class="card shadow border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-timeline"></i> {% trans "Timeline" %}</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <strong>{% trans "Assigned:" %}</strong><br>
+                            <small>{{ assignment.assigned_at|date:"M d, Y H:i" }}</small>
+                        </li>
+                        {% if assignment.started_at %}
+                            <li class="mb-2">
+                                <i class="fas fa-play-circle text-info"></i>
+                                <strong>{% trans "Started:" %}</strong><br>
+                                <small>{{ assignment.started_at|date:"M d, Y H:i" }}</small>
+                            </li>
+                        {% endif %}
+                        {% if assignment.completed_at %}
+                            <li class="mb-2">
+                                <i class="fas fa-flag-checkered text-success"></i>
+                                <strong>{% trans "Completed:" %}</strong><br>
+                                <small>{{ assignment.completed_at|date:"M d, Y H:i" }}</small>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

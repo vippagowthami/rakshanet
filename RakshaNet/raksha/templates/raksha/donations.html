@@ -1,0 +1,355 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Donations" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Page Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-2">
+                        <i class="fas fa-hand-holding-heart"></i> {% trans "Donations Management" %}
+                    </h2>
+                    <p class="text-muted">{% trans "Track and manage disaster relief donations" %}</p>
+                </div>
+                <a href="{% url 'create-donation' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus-circle"></i> {% trans "Record Donation" %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- NGO/Admin Information Banner -->
+    {% if user.profile.is_ngo_or_admin %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-info-circle"></i> {% trans "Donation Management for NGOs" %}</h5>
+                <p class="mb-0">
+                    {% trans "As an NGO/Admin, you can view donations that are linked to crisis requests assigned to your organization. To see donations here:" %}
+                </p>
+                <ul class="mb-0 mt-2">
+                    <li>{% trans "Donors must link their donations to specific crisis requests" %}</li>
+                    <li>{% trans "Those crisis requests must be assigned to your NGO" %}</li>
+                    <li>{% trans "You can manage crisis requests from your" %} <a href="{% url 'ngo-manage-requests' %}">{% trans "Requests Dashboard" %}</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card shadow text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="card-body">
+                    <i class="fas fa-donate fa-3x mb-3"></i>
+                    <h3>{{ total_donations }}</h3>
+                    <p>{% trans "Total Donations" %}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card shadow text-center" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+                <div class="card-body">
+                    <i class="fas fa-dollar-sign fa-3x mb-3"></i>
+                    <h3>₹{{ total_money|floatformat:2 }}</h3>
+                    <p>{% trans "Total Money Raised" %}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-3">
+            <div class="card shadow text-center" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <div class="card-body">
+                    <i class="fas fa-users fa-3x mb-3"></i>
+                    <h3>{{ donations.count }}</h3>
+                    <p>{% trans "Active Campaigns" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donations List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h4 class="mb-0">
+                        <i class="fas fa-list"></i> {% trans "Donation History" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if donations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{% trans "Date" %}</th>
+                                    <th>{% trans "Donor" %}</th>
+                                    <th>{% trans "Type" %}</th>
+                                    <th>{% trans "Amount/Details" %}</th>
+                                    <th>{% trans "Crisis Request" %}</th>
+                                    <th>{% trans "Status" %}</th>
+                                    <th>{% trans "Actions" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for donation in donations %}
+                                <tr>
+                                    <td>{{ donation.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <i class="fas fa-user"></i> {{ donation.donor.username }}
+                                    </td>
+                                    <td>
+                                        {% if donation.donation_type == 'money' %}
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-dollar-sign"></i> {% trans "Money" %}
+                                            </span>
+                                        {% elif donation.donation_type == 'goods' %}
+                                            <span class="badge badge-info">
+                                                <i class="fas fa-box"></i> {% trans "Goods" %}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-warning">
+                                                <i class="fas fa-hand-holding"></i> {% trans "Other" %}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if donation.donation_type == 'money' %}
+                                            <strong class="text-success">₹{{ donation.amount|floatformat:2 }}</strong>
+                                        {% else %}
+                                            {{ donation.note|truncatewords:10|default:"--" }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if donation.request %}
+                                            <a href="{% url 'view-crisis-request' donation.request.id %}" class="text-primary">
+                                                #{{ donation.request.id }} - {{ donation.request.disaster_type.name|default:"General" }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">{% trans "General Fund" %}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-success">
+                                            <i class="fas fa-check"></i> {% trans "Received" %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            {% if donation.donor == user or user.profile.is_ngo_or_admin %}
+                                                <a href="{% url 'edit-donation' donation.id %}" class="btn btn-sm btn-warning" title="{% trans 'Edit' %}">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'delete-donation' donation.id %}" class="btn btn-sm btn-danger" title="{% trans 'Delete' %}">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle"></i> 
+                        {% if user.profile.is_ngo_or_admin %}
+                            {% trans "No donations recorded yet for your organization's crisis requests." %}
+                            <br><br>
+                            <small>{% trans "Donations will appear here once they are linked to crisis requests assigned to your NGO." %}</small>
+                        {% else %}
+                            {% trans "No donations recorded yet." %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Form Section (for regular users) -->
+    {% if not user.profile.is_ngo_or_admin %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-heart"></i> {% trans "Make a Donation" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        {% trans "To make a donation, please visit a specific crisis request or contact an NGO directly." %}
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'public_emergency_alerts' %}" class="btn btn-primary btn-lg mr-2">
+                            <i class="fas fa-exclamation-triangle"></i> {% trans "View Active Crises" %}
+                        </a>
+                        <a href="{% url 'public_shelters' %}" class="btn btn-success btn-lg">
+                            <i class="fas fa-home"></i> {% trans "Find Shelters" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Image/Video Upload Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-photo-video"></i> {% trans "Media Documentation" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">{% trans "Upload images or videos to document donations and relief efforts" %}</p>
+                    
+                    <form method="POST" action="{% url 'upload-donation-media' %}" enctype="multipart/form-data" id="mediaUploadForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="mediaFile">{% trans "Select Image or Video" %}</label>
+                            <input type="file" class="form-control-file" id="mediaFile" name="media_file" accept="image/*,video/*">
+                            <small class="form-text text-muted">
+                                {% trans "Supported formats: JPG, PNG, GIF, MP4, AVI, MOV (Max 50MB)" %}
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mediaDescription">{% trans "Description" %}</label>
+                            <textarea class="form-control" id="mediaDescription" name="description" rows="3" placeholder="{% trans 'Describe the media...' %}"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> {% trans "Upload Media" %}
+                        </button>
+                    </form>
+                    
+                    <!-- Media Preview Container -->
+                    <div id="mediaPreview" class="mt-4" style="display:none;">
+                        <h5>{% trans "Preview:" %}</h5>
+                        <div id="previewContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Uploaded Media Gallery Section -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-images"></i> {% trans "Uploaded Media Gallery" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if all_media %}
+                        <div class="row">
+                            {% for media in all_media %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100 shadow-sm">
+                                        {% if media.media_type == 'image' %}
+                                            <img src="{{ media.file.url }}" class="card-img-top" alt="Media" style="height: 250px; object-fit: cover;">
+                                        {% else %}
+                                            <video class="card-img-top" style="height: 250px; object-fit: cover;" controls>
+                                                <source src="{{ media.file.url }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ media.get_media_type_display }}</h6>
+                                            <p class="card-text text-muted">{{ media.description|truncatewords:20 }}</p>
+                                            <small class="text-muted d-block mb-2">{% trans "Uploaded" %}: {{ media.created_at|date:"M d, Y H:i" }}</small>
+                                            {% if media.donation %}
+                                                <small class="text-info d-block">
+                                                    <i class="fas fa-link"></i> {% trans "Related Donation" %}: #{{ media.donation.id }}
+                                                </small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i> {% trans "No media uploaded yet. Start by uploading images or videos above." %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+<style>
+    .card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    
+    #mediaPreview img {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    #mediaPreview video {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    
+    .card img {
+        min-height: 200px;
+    }
+    
+    .card video {
+        min-height: 200px;
+    }
+</style>
+
+<script>
+    // Media file preview
+    document.getElementById('mediaFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            const preview = document.getElementById('mediaPreview');
+            const previewContent = document.getElementById('previewContent');
+            
+            reader.onload = function(e) {
+                if (file.type.startsWith('image/')) {
+                    previewContent.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
+                } else if (file.type.startsWith('video/')) {
+                    previewContent.innerHTML = '<video controls src="' + e.target.result + '"></video>';
+                }
+                preview.style.display = 'block';
+            };
+            
+            reader.readAsDataURL(file);
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Emergency Shelters" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex align-items-center justify-content-between">
+                <h1>
+                    <i class="fas fa-home text-success"></i> {% trans "Emergency Shelters" %}
+                </h1>
+                {% if user.is_authenticated and user.profile.is_ngo_or_admin %}
+                <a href="{% url 'ngo-create-shelter' %}" class="btn btn-success">
+                    <i class="fas fa-plus"></i> {% trans "Add Shelter" %}
+                </a>
+                {% endif %}
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <form method="GET" class="form-inline">
+                        <div class="form-group mr-2">
+                            <label for="status" class="mr-2">{% trans "Status:" %}</label>
+                            <select name="status" id="status" class="form-control mr-3">
+                                <option value="">{% trans "All" %}</option>
+                                <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>
+                                    {% trans "Active" %}
+                                </option>
+                                <option value="full" {% if request.GET.status == 'full' %}selected{% endif %}>
+                                    {% trans "Full" %}
+                                </option>
+                                <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>
+                                    {% trans "Inactive" %}
+                                </option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> {% trans "Filter" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if shelters %}
+        <div class="row">
+            {% for shelter in shelters %}
+            <div class="col-md-6 mb-3">
+                <div class="card shadow h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">{{ shelter.name }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Address -->
+                        <div class="mb-2">
+                            <small><i class="fas fa-map-marker-alt"></i> <strong>{% trans "Address:" %}</strong></small><br>
+                            <small>{{ shelter.address|truncatewords:15 }}</small>
+                        </div>
+
+                        <!-- Location Details -->
+                        <div class="mb-2">
+                            <small><i class="fas fa-location-dot"></i> <strong>{% trans "Location:" %}</strong></small><br>
+                            <small>{{ shelter.address|truncatewords:15 }}</small>
+                        </div>
+
+                        <!-- Capacity -->
+                        <div class="alert alert-info mb-2">
+                            <strong>{% trans "Capacity:" %}</strong> 
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar" role="progressbar" 
+                                      style="width: {% widthratio shelter.current_occupancy shelter.capacity 100 %}%"
+                                     aria-valuenow="{{ shelter.current_occupancy }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="{{ shelter.capacity }}">
+                                    {{ shelter.current_occupancy }} / {{ shelter.capacity }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="mb-2">
+                            {% if shelter.status == 'active' and shelter.current_occupancy < shelter.capacity %}
+                                <span class="badge badge-success">
+                                    <i class="fas fa-check-circle"></i> {% trans "Available" %}
+                                </span>
+                            {% elif shelter.status == 'full' or shelter.current_occupancy >= shelter.capacity %}
+                                <span class="badge badge-warning">
+                                    <i class="fas fa-exclamation-triangle"></i> {% trans "Full" %}
+                                </span>
+                            {% else %}
+                                <span class="badge badge-danger">
+                                    <i class="fas fa-ban"></i>{{ shelter.get_status_display }}
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Contact Info -->
+                        {% if shelter.managed_by and shelter.managed_by.contact_person %}
+                        <div class="mb-2">
+                            <small><strong>{% trans "Contact:" %}</strong> {{ shelter.managed_by.contact_person }}</small>
+                        </div>
+                        {% endif %}
+
+                        {% if shelter.contact_number %}
+                        <div class="mb-2">
+                            <small>
+                                <i class="fas fa-phone"></i> 
+                                <a href="tel:{{ shelter.contact_number }}">{{ shelter.contact_number }}</a>
+                            </small>
+                        </div>
+                        {% endif %}
+
+                        <!-- Description -->
+                        {% if shelter.facilities %}
+                        <div class="alert alert-light mb-2">
+                            <small>{{ shelter.facilities|truncatewords:20 }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer bg-light">
+                        <small class="text-muted">
+                            {% trans "Last updated:" %} {{ shelter.updated_at|date:"SHORT_DATE_FORMAT" }}
+                        </small>
+                        {% if user.is_authenticated and user.profile.is_ngo_or_admin %}
+                        <div class="float-right">
+                            <a href="{% url 'ngo-edit-shelter' shelter.id %}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'ngo-delete-shelter' shelter.id %}" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> 
+            {% trans "No shelters available at this time." %}
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+.occupancy_percentage {
+    height: 20px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // No JS processing needed; occupancy is calculated server-side.
+});
+</script>
+{% endblock %}

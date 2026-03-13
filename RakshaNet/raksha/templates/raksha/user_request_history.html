@@ -1,0 +1,235 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "My Request History" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="mb-4">
+                <i class="fas fa-history"></i> {% trans "My Crisis Request History" %}
+            </h2>
+        </div>
+    </div>
+
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ stats.total }}</h3>
+                    <p class="mb-0">{% trans "Total Requests" %}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ stats.pending }}</h3>
+                    <p class="mb-0">{% trans "Pending" %}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-white bg-info">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ stats.in_progress }}</h3>
+                    <p class="mb-0">{% trans "In Progress" %}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-white bg-success">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">{{ stats.completed }}</h3>
+                    <p class="mb-0">{% trans "Completed" %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Requests List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-list"></i> {% trans "All My Requests" %}</h5>
+                    <a href="{% url 'create-crisis-request' %}" class="btn btn-danger btn-sm">
+                        <i class="fas fa-plus"></i> {% trans "New Request" %}
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if requests %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>{% trans "ID" %}</th>
+                                        <th>{% trans "Disaster Type" %}</th>
+                                        <th>{% trans "Location" %}</th>
+                                        <th>{% trans "Urgency" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "Verification" %}</th>
+                                        <th>{% trans "People Affected" %}</th>
+                                        <th>{% trans "Date" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for request in requests %}
+                                        <tr>
+                                            <td><strong>#{{ request.id }}</strong></td>
+                                            <td>
+                                                <span class="badge badge-secondary">
+                                                    {{ request.disaster_type.name }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-map-marker-alt text-danger"></i> 
+                                                {{ request.location|truncatechars:25 }}
+                                            </td>
+                                            <td>
+                                                {% if request.urgency_level == 'critical' %}
+                                                    <span class="badge badge-danger badge-pill">{% trans "Critical" %}</span>
+                                                {% elif request.urgency_level == 'high' %}
+                                                    <span class="badge badge-warning badge-pill">{% trans "High" %}</span>
+                                                {% elif request.urgency_level == 'medium' %}
+                                                    <span class="badge badge-info badge-pill">{% trans "Medium" %}</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary badge-pill">{% trans "Low" %}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if request.status == 'pending' %}
+                                                    <span class="badge badge-warning">{% trans "Pending" %}</span>
+                                                {% elif request.status == 'verified' %}
+                                                    <span class="badge badge-info">{% trans "Verified" %}</span>
+                                                {% elif request.status == 'assigned' %}
+                                                    <span class="badge badge-primary">{% trans "Assigned" %}</span>
+                                                {% elif request.status == 'in_progress' %}
+                                                    <span class="badge badge-info">{% trans "In Progress" %}</span>
+                                                {% elif request.status == 'completed' %}
+                                                    <span class="badge badge-success">{% trans "Completed" %}</span>
+                                                {% elif request.status == 'cancelled' %}
+                                                    <span class="badge badge-danger">{% trans "Cancelled" %}</span>
+                                                {% elif request.status == 'rejected' %}
+                                                    <span class="badge badge-dark">{% trans "Rejected" %}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if request.is_verified %}
+                                                    <i class="fas fa-check-circle text-success" title="{% trans 'Verified' %}"></i>
+                                                {% else %}
+                                                    <i class="fas fa-clock text-warning" title="{% trans 'Pending Verification' %}"></i>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <i class="fas fa-users"></i> {{ request.people_affected|default:"N/A" }}
+                                            </td>
+                                            <td>
+                                                <small>{{ request.created_at|date:"M d, Y" }}<br>{{ request.created_at|time:"H:i" }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group-vertical btn-group-sm" role="group">
+                                                    <a href="{% url 'view-crisis-request' request.id %}" 
+                                                       class="btn btn-info btn-sm" 
+                                                       title="{% trans 'View' %}">
+                                                        <i class="fas fa-eye"></i> {% trans "View" %}
+                                                    </a>
+                                                    {% if request.status == 'pending' or request.status == 'verified' %}
+                                                        <a href="{% url 'edit-crisis-request' request.id %}" 
+                                                           class="btn btn-warning btn-sm" 
+                                                           title="{% trans 'Edit' %}">
+                                                            <i class="fas fa-edit"></i> {% trans "Edit" %}
+                                                        </a>
+                                                        <a href="{% url 'delete-crisis-request' request.id %}" 
+                                                           class="btn btn-danger btn-sm" 
+                                                           title="{% trans 'Delete' %}">
+                                                            <i class="fas fa-trash"></i> {% trans "Delete" %}
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        {% if is_paginated %}
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1">{% trans "First" %}</a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                                                <i class="fas fa-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    <li class="page-item active">
+                                        <span class="page-link">
+                                            {% trans "Page" %} {{ page_obj.number }} {% trans "of" %} {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                                <i class="fas fa-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">{% trans "Last" %}</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle fa-3x mb-3"></i>
+                            <h5>{% trans "No Crisis Requests Yet" %}</h5>
+                            <p>{% trans "You haven't submitted any crisis requests." %}</p>
+                            <a href="{% url 'create-crisis-request' %}" class="btn btn-danger btn-lg mt-2">
+                                <i class="fas fa-plus-circle"></i> {% trans "Report Your First Crisis" %}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body text-center">
+                    <h5>{% trans "Need Help?" %}</h5>
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'user-dashboard' %}" class="btn btn-primary">
+                            <i class="fas fa-home"></i> {% trans "Dashboard" %}
+                        </a>
+                        <a href="{% url 'create-crisis-request' %}" class="btn btn-danger">
+                            <i class="fas fa-plus"></i> {% trans "New Request" %}
+                        </a>
+                        <a href="{% url 'submit-feedback' %}" class="btn btn-info">
+                            <i class="fas fa-comment"></i> {% trans "Give Feedback" %}
+                        </a>
+                        <a href="{% url 'public_emergency_alerts' %}" class="btn btn-warning">
+                            <i class="fas fa-bell"></i> {% trans "Active Alerts" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

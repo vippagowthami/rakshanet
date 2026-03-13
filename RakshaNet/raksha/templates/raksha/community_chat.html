@@ -1,0 +1,162 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Live Coordination Chat" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments"></i> {% trans "Community Coordination" %}
+                    </h5>
+                    <small class="text-muted">{% trans "Live updates every 4 seconds" %}</small>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="form-inline mb-3">
+                        <label for="channel" class="mr-2"><strong>{% trans "Channel" %}</strong></label>
+                        <select id="channel" name="channel" class="form-control mr-2" onchange="this.form.submit()">
+                            {% for channel in channels %}
+                                <option value="{{ channel.slug }}" {% if channel.slug == selected_channel.slug %}selected{% endif %}>
+                                    {{ channel.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <span class="text-muted">{{ selected_channel.description }}</span>
+                    </form>
+
+                    <div id="chat-feed" class="border rounded p-3" style="max-height: 360px; overflow-y: auto; background: #fafafa;">
+                        {% if community_messages %}
+                            {% for msg in community_messages %}
+                                <div class="mb-2 pb-2 border-bottom" data-message-id="{{ msg.id }}">
+                                    <strong>{{ msg.sender.username }}</strong>
+                                    {% if msg.is_urgent %}<span class="badge badge-danger ml-1">URGENT</span>{% endif %}
+                                    <small class="text-muted">{{ msg.created_at|date:"M d, Y H:i" }}</small>
+                                    <div>{{ msg.message }}</div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted mb-0" id="no-chat-msg">{% trans "No messages yet. Start coordination now." %}</p>
+                        {% endif %}
+                    </div>
+
+                    <form method="post" action="{% url 'post-community-message' %}" class="mt-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="channel_slug" value="{{ selected_channel.slug }}">
+                        <div class="form-group mb-2">
+                            <label for="community-message"><strong>{% trans "Send Message" %}</strong></label>
+                            <textarea id="community-message" name="message" class="form-control" rows="3" maxlength="1000" placeholder="Share live updates, need alerts, and field constraints" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i> {% trans "Send" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-robot"></i> {% trans "AI Coordination Assistant" %}</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'ai-chat-assistant' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="ai-prompt"><strong>{% trans "Ask AI" %}</strong></label>
+                            <textarea id="ai-prompt" name="prompt" class="form-control" rows="4" placeholder="Example: 20 people affected by flooding, what should we coordinate first?" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block">
+                            <i class="fas fa-bolt"></i> {% trans "Get Plan" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-history"></i> {% trans "Recent AI Responses" %}</h6>
+                </div>
+                <div class="card-body" style="max-height: 360px; overflow-y: auto;">
+                    {% if ai_history %}
+                        {% for item in ai_history %}
+                            <div class="mb-3 pb-2 border-bottom">
+                                <small class="text-muted">{{ item.created_at|date:"M d, Y H:i" }}</small>
+                                <div><strong>Q:</strong> {{ item.prompt }}</div>
+                                <div class="mt-1"><strong>A:</strong> {{ item.response|linebreaksbr }}</div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted mb-0">{% trans "No AI chat history yet." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    const channelSlug = "{{ selected_channel.slug }}";
+    const feed = document.getElementById('chat-feed');
+    let lastMessageId = 0;
+
+    const existing = feed.querySelectorAll('[data-message-id]');
+    if (existing.length) {
+        lastMessageId = parseInt(existing[existing.length - 1].getAttribute('data-message-id'), 10) || 0;
+        feed.scrollTop = feed.scrollHeight;
+    }
+
+    function escapeHtml(input) {
+        return input
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function appendMessage(msg) {
+        const noChat = document.getElementById('no-chat-msg');
+        if (noChat) {
+            noChat.remove();
+        }
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mb-2 pb-2 border-bottom';
+        wrapper.setAttribute('data-message-id', String(msg.id));
+
+        const urgentBadge = msg.is_urgent ? '<span class="badge badge-danger ml-1">URGENT</span>' : '';
+        wrapper.innerHTML =
+            '<strong>' + escapeHtml(msg.sender) + '</strong> ' +
+            urgentBadge +
+            ' <small class="text-muted">' + escapeHtml(msg.created_at) + '</small>' +
+            '<div>' + escapeHtml(msg.message) + '</div>';
+
+        feed.appendChild(wrapper);
+        feed.scrollTop = feed.scrollHeight;
+    }
+
+    function pollMessages() {
+        fetch('/raksha/community/chat/messages/?channel=' + encodeURIComponent(channelSlug) + '&since_id=' + lastMessageId)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.messages || !data.messages.length) {
+                    return;
+                }
+                data.messages.forEach(msg => {
+                    appendMessage(msg);
+                    lastMessageId = msg.id;
+                });
+            })
+            .catch(() => {});
+    }
+
+    setInterval(pollMessages, 4000);
+})();
+</script>
+{% endblock %}

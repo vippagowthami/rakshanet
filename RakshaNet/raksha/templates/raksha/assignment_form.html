@@ -1,0 +1,124 @@
+{% extends 'raksha/base_raksha.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Create Assignment" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus"></i> {% trans "Create New Assignment" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="close" data-dismiss="alert">
+                                    <span>&times;</span>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" id="assignmentForm">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="{{ form.request.id_for_label }}">
+                                <strong>{% trans "Crisis Request" %}</strong> <span class="text-danger">*</span>
+                            </label>
+                            {{ form.request }}
+                            {% if form.request.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.request.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{% trans "Select the crisis request to assign" %}</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.volunteer.id_for_label }}">
+                                <strong>{% trans "Volunteer" %}</strong> <span class="text-danger">*</span>
+                            </label>
+                            {{ form.volunteer }}
+                            {% if form.volunteer.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.volunteer.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{% trans "Select an available volunteer" %}</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.notes.id_for_label }}">
+                                <strong>{% trans "Assignment Notes" %}</strong>
+                            </label>
+                            {{ form.notes }}
+                            {% if form.notes.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.notes.errors }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">{% trans "Add any special instructions or notes for the volunteer" %}</small>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>{% trans "Note:" %}</strong>
+                            {% trans "The volunteer will receive a notification about this assignment. The crisis request status will be automatically updated to 'assigned'." %}
+                        </div>
+
+                        <hr>
+
+                        <div class="form-group text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i> {% trans "Create Assignment" %}
+                            </button>
+                            <a href="{% url 'ngo-dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> {% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card mt-3 border-info">
+                <div class="card-body">
+                    <h5 class="text-info"><i class="fas fa-question-circle"></i> {% trans "Assignment Guidelines" %}</h5>
+                    <ul class="mb-0">
+                        <li>{% trans "Select only verified crisis requests for assignment" %}</li>
+                        <li>{% trans "Choose volunteers based on their skills and availability" %}</li>
+                        <li>{% trans "Add clear instructions in the notes field" %}</li>
+                        <li>{% trans "Volunteers can accept or decline assignments" %}</li>
+                        <li>{% trans "Track assignment progress from the NGO dashboard" %}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Filter volunteers based on availability
+    const volunteerSelect = document.getElementById('id_volunteer');
+    if (volunteerSelect) {
+        // Add visual indicator for available volunteers
+        const options = volunteerSelect.querySelectorAll('option');
+        options.forEach(option => {
+            if (option.textContent.includes('(Available)')) {
+                option.style.backgroundColor = '#d4edda';
+                option.style.fontWeight = 'bold';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

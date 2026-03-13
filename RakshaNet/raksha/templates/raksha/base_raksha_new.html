@@ -1,0 +1,359 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% trans "RakshaNet - Disaster Management System" %}{% endblock %}</title>
+
+        <script
+            type="text/javascript"
+            src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+        ></script>
+        <script type="text/javascript">
+            function googleTranslateElementInit() {
+                new google.translate.TranslateElement(
+                    { pageLanguage: "en" },
+                    "google_translate_element"
+                );
+            }
+        </script>
+    
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        /* Navbar */
+        .navbar-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-custom .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: #2c3e50;
+            transition: left 0.3s ease;
+            z-index: 999;
+            overflow-y: auto;
+            padding-top: 60px;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            border-bottom: 1px solid #34495e;
+        }
+
+        .sidebar-menu a {
+            display: block;
+            color: #ecf0f1;
+            padding: 15px 20px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .sidebar-menu a:hover {
+            background: #34495e;
+            padding-left: 30px;
+            color: #fff;
+        }
+
+        .sidebar-menu a i {
+            margin-right: 10px;
+            width: 20px;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 998;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        /* Profile Dropdown */
+        .profile-icon {
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .profile-icon:hover {
+            background: rgba(255,255,255,0.5);
+        }
+
+        .profile-icon i {
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 300px;
+            transition: margin-left 0.3s ease;
+            padding: 20px;
+        }
+
+        .main-content.with-sidebar {
+            margin-left: 300px;
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        /* Buttons */
+        .btn-primary-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary-custom:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Utility */
+        .text-center { text-align: center; }
+        .mt-4 { margin-top: 2rem; }
+        .mb-4 { margin-bottom: 2rem; }
+        .p-4 { padding: 2rem; }
+        .rounded { border-radius: 10px; }
+        .shadow-sm { box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .language-selector {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 500;
+        }
+
+        #google_translate_element select {
+            height: 30px;
+            border-radius: 20px;
+            border: none;
+            padding: 2px 10px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 250px;
+                left: -250px;
+            }
+            
+            .sidebar.active {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+            }
+            
+            .language-selector {
+                top: 60px;
+                right: 10px;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar Navigation -->
+    {% if user.is_authenticated %}
+    <div class="sidebar active" id="sidebar">
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'raksha-home' %}" style="background: #34495e; font-weight: bold;"><i class="fas fa-home"></i> {% trans "Home" %}</a></li>
+            
+            {% if user.profile.is_ngo_or_admin %}
+                <li><a href="{% url 'resources' %}"><i class="fas fa-cube"></i> {% trans "Resources" %}</a></li>
+                <li><a href="{% url 'donations' %}"><i class="fas fa-hand-holding-heart"></i> {% trans "Donations" %}</a></li>
+            {% endif %}
+            
+            {% if user.profile.is_volunteer %}
+                <!-- No additional items - everything is on home page -->
+            {% endif %}
+            
+            {% if user.profile.is_common_user %}
+                <li><a href="{% url 'donations' %}"><i class="fas fa-hand-holding-heart"></i> {% trans "Donations" %}</a></li>
+            {% endif %}
+
+            <li><a href="{% url 'raksha-dashboard' %}"><i class="fas fa-map-marked-alt"></i> {% trans "Interactive Map" %}</a></li>
+
+            <li><a href="{% url 'community-chat' %}"><i class="fas fa-comments"></i> {% trans "Live Chat & AI" %}</a></li>
+            
+            <li style="border-top: 2px solid #34495e; margin-top: 20px;"></li>
+            <li><a href="{% url 'profile' %}"><i class="fas fa-user-cog"></i> {% trans "Profile & Settings" %}</a></li>
+            <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> {% trans "Logout" %}</a></li>
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container-fluid">
+            <button class="btn btn-link text-white mr-3" id="sidebarToggle" {% if not user.is_authenticated %}style="display:none;"{% endif %}>
+                <i class="fas fa-bars fa-lg"></i>
+            </button>
+            
+            <a class="navbar-brand" href="{% url 'raksha-home' %}">
+                <i class="fas fa-shield-alt"></i> <strong>RakshaNet</strong>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item mr-2" style="display:flex;align-items:center;">
+                        <div id="google_translate_element"></div>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <span class="badge" style="background: {% if user.profile.is_ngo_or_admin %}#007bff{% elif user.profile.is_volunteer %}#28a745{% else %}#6c757d{% endif %}; color: white; padding: 5px 10px; border-radius: 15px;">
+                                {% if user.profile.is_ngo_or_admin %}NGO/Admin{% elif user.profile.is_volunteer %}Volunteer{% else %}User{% endif %}
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link profile-icon" href="{% url 'profile' %}" title="Profile">
+                                <i class="fas fa-user-circle"></i>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">{% trans "Login" %}</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'register' %}">{% trans "Register" %}</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <div class="container">
+            <p>&copy; 2026 {% trans "RakshaNet - Disaster Management System" %}. {% trans "All rights reserved." %}</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sidebar Toggle
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                sidebarOverlay.classList.toggle('active');
+            });
+
+            sidebarOverlay.addEventListener('click', function() {
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+            });
+        }
+
+        // Close sidebar on link click
+        if (sidebar) {
+            const sidebarLinks = sidebar.querySelectorAll('a');
+            sidebarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                });
+            });
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

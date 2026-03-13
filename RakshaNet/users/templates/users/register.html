@@ -1,0 +1,135 @@
+{% load static %}
+{% load crispy_forms_tags %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" type="image/png" href="../../../media/favicon.png">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <title>RakshaNet - Register</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin-top: 120px;
+            min-height: 100vh;
+        }
+        .content-section {
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+            background: white;
+        }
+        .role-description {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .role-description h5 {
+            margin-bottom: 10px;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .role-description p {
+            margin: 0;
+            font-size: 14px;
+            color: #555;
+        }
+        .radio-wrapper {
+            display: flex;
+            align-items: flex-start;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            margin: 10px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .radio-wrapper:hover {
+            background: #f5f5ff;
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+        .radio-wrapper input[type="radio"] {
+            margin-right: 15px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+        .radio-content {
+            flex: 1;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        legend {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.3) !important;
+            backdrop-filter: blur(10px);
+        }
+        .navbar-brand {
+            font-size: 28px;
+            font-weight: bold;
+            color: white !important;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'landing' %}">🛡️ RakshaNet</a>
+                <div class="collapse navbar-collapse">
+                    <div class="navbar-nav ml-auto">
+                        <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
+                        <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <main role="main" class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+                    {{message}}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="content-section">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <fieldset class="form-group">
+                    <legend class="border-bottom mb-4">Join RakshaNet Today</legend>
+                    {{ form|crispy }}
+                </fieldset>
+                <div class="form-group">
+                    <button class="btn btn-info btn-block" type="submit">Sign Up</button>
+                </div>
+            </form>
+            
+            <div class="border-top pt-3 text-center">
+                <small class="text-muted">Have an account? <a href="{% url 'login' %}">Log in here</a></small>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

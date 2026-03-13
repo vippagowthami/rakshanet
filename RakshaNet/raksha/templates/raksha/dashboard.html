@@ -1,0 +1,727 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Interactive Map Dashboard" %} - RakshaNet{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+<style>
+  #crisisMap {
+    height: 540px;
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #d9e2ec;
+  }
+  .map-card {
+    background: #ffffff;
+    border: 1px solid #e6ebf1;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .legend-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  .legend-item {
+    margin-right: 16px;
+    font-size: 0.9rem;
+  }
+  .map-toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .route-status {
+    font-size: 0.9rem;
+    color: #51606f;
+    margin-top: 10px;
+  }
+  .toolbar-select {
+    min-width: 145px;
+  }
+  .map-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.82rem;
+    margin: 4px 6px 0 0;
+    background: #eef2f6;
+    color: #324255;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-2">
+  <div class="row mb-3">
+    <div class="col-md-8">
+      <h2 class="mb-1"><i class="fas fa-map-marked-alt"></i> {% trans "Interactive Map Dashboard" %}</h2>
+      <p class="text-muted mb-0">{% trans "Live crisis visualization for requests, shelters, and active alerts." %}</p>
+    </div>
+    <div class="col-md-4 text-md-right mt-2 mt-md-0">
+      <a href="{% url 'raksha-home' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> {% trans "Back to Home" %}
+      </a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-9">
+      <div class="map-card">
+        <div class="map-toolbar">
+          <input id="mapSearchInput" type="text" class="form-control form-control-sm" style="max-width:280px" placeholder="Search by request id, disaster, address">
+          <select id="urgencyFilter" class="form-control form-control-sm toolbar-select">
+            <option value="all">All urgencies</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+          <select id="statusFilter" class="form-control form-control-sm toolbar-select">
+            <option value="all">All statuses</option>
+            <option value="submitted">Submitted</option>
+            <option value="verified">Verified</option>
+            <option value="approved">Approved</option>
+            <option value="pending">Pending</option>
+            <option value="allocated">Allocated</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+          </select>
+          <button id="mapSearchBtn" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-search"></i> {% trans "Find" %}
+          </button>
+          <button id="fitAllBtn" class="btn btn-sm btn-outline-info">
+            <i class="fas fa-expand"></i> {% trans "Fit All" %}
+          </button>
+          <button id="resetFiltersBtn" class="btn btn-sm btn-outline-dark">
+            <i class="fas fa-sync-alt"></i> {% trans "Reset" %}
+          </button>
+          <button id="clearRouteBtn" class="btn btn-sm btn-outline-danger">
+            <i class="fas fa-times"></i> {% trans "Clear Route" %}
+          </button>
+        </div>
+        <div id="crisisMap"></div>
+        <div class="route-status" id="routeStatus">{% trans "Click any map point to inspect it, get directions, or open it in maps." %}</div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="map-card">
+        <h6 class="mb-3"><i class="fas fa-layer-group"></i> {% trans "Map Layers" %}</h6>
+        <div class="mb-2"><span class="legend-dot" style="background:#dc3545"></span><span class="legend-item">{% trans "Crisis Requests" %}</span></div>
+        <div class="mb-2"><span class="legend-dot" style="background:#28a745"></span><span class="legend-item">{% trans "Shelters" %}</span></div>
+        <div class="mb-2"><span class="legend-dot" style="background:#fd7e14"></span><span class="legend-item">{% trans "Active Alerts" %}</span></div>
+      </div>
+
+      <div class="map-card">
+        <h6 class="mb-3"><i class="fas fa-chart-pie"></i> {% trans "Coverage" %}</h6>
+        <p class="mb-1">{% trans "Total Mapped Points:" %} <strong id="totalMapPoints">{{ total_map_points }}</strong></p>
+        <p class="mb-1">{% trans "Requests:" %} <strong id="requestCount">{{ request_count|default:requests|length }}</strong></p>
+        <p class="mb-1">{% trans "Requests With Location:" %} <strong id="mappableRequestCount">{{ mappable_request_count|default:0 }}</strong></p>
+        <p class="mb-1">{% trans "Shelters:" %} <strong id="shelterCount">{{ shelters|length }}</strong></p>
+        <p class="mb-1">{% trans "Active Alerts:" %} <strong id="alertCount">{{ active_alerts|length }}</strong></p>
+        <small class="text-muted">{% trans "Last updated:" %} <span id="mapLastUpdated">--</span></small>
+        <div id="activeFilterChips" class="mt-2"></div>
+        <div class="mt-2">
+          <button id="locateMeBtn" class="btn btn-sm btn-outline-primary">
+            <i class="fas fa-location-arrow"></i> {% trans "Use My Location" %}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="map-card">
+        <h5><i class="fas fa-clipboard-list"></i> {% trans "Recent Mapped Requests" %}</h5>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0">
+            <thead>
+              <tr>
+                <th>{% trans "ID" %}</th>
+                <th>{% trans "Disaster" %}</th>
+                <th>{% trans "Urgency" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Address" %}</th>
+                <th>{% trans "People" %}</th>
+              </tr>
+            </thead>
+            <tbody id="requestTableBody">
+              {% for req in requests|slice:":20" %}
+              <tr>
+                <td>#{{ req.id }}</td>
+                <td>{{ req.disaster_type }}</td>
+                <td>{{ req.urgency }}</td>
+                <td>{{ req.status }}</td>
+                <td>{{ req.address|default:"N/A"|truncatewords:8 }}</td>
+                <td>{{ req.people_affected }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="text-center text-muted py-3">{% trans "No geocoded requests available." %}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ map_payload|json_script:"map-payload" }}
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script>
+  const initialPayload = JSON.parse(document.getElementById('map-payload').textContent);
+  const map = L.map('crisisMap').setView([initialPayload.map_center_lat, initialPayload.map_center_lng], 6);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  function createPointLayer(options) {
+    if (typeof L.markerClusterGroup === 'function') {
+      return L.markerClusterGroup(options || {});
+    }
+    return L.layerGroup();
+  }
+
+  const requestsLayer = createPointLayer({disableClusteringAtZoom: 12, spiderfyOnMaxZoom: true});
+  const sheltersLayer = createPointLayer({disableClusteringAtZoom: 13});
+  const alertsLayer = createPointLayer({disableClusteringAtZoom: 12});
+  const geocodeCache = {};
+  const geocodePending = {};
+  const markerRegistry = new Map();
+  let currentPayload = initialPayload;
+  let userLocation = null;
+  let userMarker = null;
+  let routeControl = null;
+  let refreshInFlight = false;
+
+  function escapeHtml(text) {
+    return String(text || '').replace(/[&<>'"]/g, function(c) {
+      return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '\'': '&#39;', '"': '&quot;'}[c];
+    });
+  }
+
+  function truncateWords(text, wordCount) {
+    const parts = String(text || '').trim().split(/\s+/);
+    if (parts.length <= wordCount) {
+      return parts.join(' ');
+    }
+    return parts.slice(0, wordCount).join(' ') + '...';
+  }
+
+  function haversineKm(lat1, lng1, lat2, lng2) {
+    const toRad = (v) => (v * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLng = toRad(lng2 - lng1);
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function requestColor(req) {
+    switch ((req.urgency_code || '').toLowerCase()) {
+      case 'critical': return '#b42318';
+      case 'high': return '#f79009';
+      case 'medium': return '#1570ef';
+      default: return '#667085';
+    }
+  }
+
+  function alertColor(alert) {
+    switch ((alert.severity_code || '').toLowerCase()) {
+      case 'extreme': return '#7a1c1c';
+      case 'critical': return '#c4320a';
+      case 'warning': return '#f79009';
+      default: return '#175cd3';
+    }
+  }
+
+  function nearestShelter(lat, lng, shelters) {
+    let best = null;
+    shelters.forEach((shelter) => {
+      const distance = haversineKm(lat, lng, shelter.lat, shelter.lng);
+      if (!best || distance < best.distance) {
+        best = { shelter: shelter, distance: distance };
+      }
+    });
+    return best;
+  }
+
+  function filteredRequests(payload) {
+    const urgencyValue = document.getElementById('urgencyFilter').value;
+    const statusValue = document.getElementById('statusFilter').value;
+    return payload.requests.filter((req) => {
+      const urgencyMatch = urgencyValue === 'all' || req.urgency_code === urgencyValue;
+      const statusMatch = statusValue === 'all' || req.status_code === statusValue;
+      return urgencyMatch && statusMatch;
+    });
+  }
+
+  function renderFilterChips() {
+    const chips = [];
+    const urgencyValue = document.getElementById('urgencyFilter').value;
+    const statusValue = document.getElementById('statusFilter').value;
+    if (urgencyValue !== 'all') {
+      chips.push('Urgency: ' + urgencyValue.replace('_', ' '));
+    }
+    if (statusValue !== 'all') {
+      chips.push('Status: ' + statusValue.replace('_', ' '));
+    }
+    document.getElementById('activeFilterChips').innerHTML = chips.map((chip) => '<span class="map-chip">' + escapeHtml(chip) + '</span>').join('');
+  }
+
+  async function geocodeAddress(address) {
+    const key = String(address || '').trim().toLowerCase();
+    if (!key) {
+      return null;
+    }
+    if (Object.prototype.hasOwnProperty.call(geocodeCache, key)) {
+      return geocodeCache[key];
+    }
+    if (Object.prototype.hasOwnProperty.call(geocodePending, key)) {
+      return geocodePending[key];
+    }
+
+    const query = encodeURIComponent(address + ', India');
+    const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=in&q=' + query;
+    geocodePending[key] = (async function() {
+      try {
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        geocodeCache[key] = null;
+        return null;
+      }
+      const data = await response.json();
+      if (!data.length) {
+        geocodeCache[key] = null;
+        return null;
+      }
+      const result = {
+        lat: parseFloat(data[0].lat),
+        lng: parseFloat(data[0].lon)
+      };
+      geocodeCache[key] = result;
+      return result;
+      } catch (e) {
+        geocodeCache[key] = null;
+        return null;
+      } finally {
+        delete geocodePending[key];
+      }
+    })();
+    return geocodePending[key];
+  }
+
+  function setRouteStatus(text) {
+    document.getElementById('routeStatus').textContent = text;
+  }
+
+  function buildPopupActions(lat, lng, label) {
+    return '<div class="mt-2 d-flex flex-wrap" style="gap:6px">' +
+      '<button class="btn btn-sm btn-outline-primary js-route-btn" data-lat="' + lat + '" data-lng="' + lng + '" data-label="' + escapeHtml(label) + '">Directions</button>' +
+      '<button class="btn btn-sm btn-outline-secondary js-focus-btn" data-lat="' + lat + '" data-lng="' + lng + '">Focus</button>' +
+      '<button class="btn btn-sm btn-outline-success js-open-maps-btn" data-lat="' + lat + '" data-lng="' + lng + '">Open Maps</button>' +
+    '</div>';
+  }
+
+  function registerMarker(key, label, marker, meta) {
+    markerRegistry.set(key, {
+      label: label,
+      marker: marker,
+      meta: meta
+    });
+  }
+
+  function openExternalDirections(lat, lng) {
+    window.open('https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lng, '_blank');
+  }
+
+  function clearRoute() {
+    if (routeControl) {
+      map.removeControl(routeControl);
+      routeControl = null;
+      setRouteStatus('Route cleared.');
+    }
+  }
+
+  function focusOnPoint(lat, lng, marker) {
+    map.setView([lat, lng], 14, {animate: true});
+    if (marker) {
+      marker.openPopup();
+    }
+  }
+
+  function updateBounds() {
+    const points = [];
+    requestsLayer.eachLayer(layer => {
+      if (typeof layer.getAllChildMarkers === 'function') {
+        layer.getAllChildMarkers().forEach(child => points.push(child.getLatLng()));
+      } else {
+        points.push(layer.getLatLng());
+      }
+    });
+    sheltersLayer.eachLayer(layer => {
+      if (typeof layer.getAllChildMarkers === 'function') {
+        layer.getAllChildMarkers().forEach(child => points.push(child.getLatLng()));
+      } else {
+        points.push(layer.getLatLng());
+      }
+    });
+    alertsLayer.eachLayer(layer => {
+      if (typeof layer.getAllChildMarkers === 'function') {
+        layer.getAllChildMarkers().forEach(child => points.push(child.getLatLng()));
+      } else {
+        points.push(layer.getLatLng());
+      }
+    });
+    if (userMarker) {
+      points.push(userMarker.getLatLng());
+    }
+    if (points.length > 0) {
+      map.fitBounds(L.latLngBounds(points), {padding: [30, 30]});
+    }
+  }
+
+  function updateCoverage(payload) {
+    document.getElementById('totalMapPoints').textContent = requestsLayer.getLayers().length + payload.shelters.length + payload.active_alerts.length;
+    document.getElementById('requestCount').textContent = filteredRequests(payload).length;
+    document.getElementById('mappableRequestCount').textContent = requestsLayer.getLayers().length;
+    document.getElementById('shelterCount').textContent = payload.shelters.length;
+    document.getElementById('alertCount').textContent = payload.active_alerts.length;
+    document.getElementById('mapLastUpdated').textContent = new Date(payload.updated_at).toLocaleTimeString();
+    renderFilterChips();
+  }
+
+  function ensureUserLocation() {
+    return new Promise((resolve) => {
+      if (userLocation) {
+        resolve(userLocation);
+        return;
+      }
+      if (!navigator.geolocation) {
+        resolve(null);
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(function(position) {
+        userLocation = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        if (userMarker) {
+          map.removeLayer(userMarker);
+        }
+        userMarker = L.circleMarker([userLocation.lat, userLocation.lng], {
+          radius: 8,
+          color: '#0d6efd',
+          fillColor: '#0d6efd',
+          fillOpacity: 0.95,
+          weight: 2
+        }).bindPopup('Your current location').addTo(map);
+        resolve(userLocation);
+      }, function() {
+        resolve(null);
+      }, {enableHighAccuracy: true, timeout: 10000});
+    });
+  }
+
+  async function startDirections(targetLat, targetLng, label) {
+    const origin = await ensureUserLocation();
+    if (!origin) {
+      openExternalDirections(targetLat, targetLng);
+      return;
+    }
+
+    clearRoute();
+
+    routeControl = L.Routing.control({
+      waypoints: [
+        L.latLng(origin.lat, origin.lng),
+        L.latLng(targetLat, targetLng)
+      ],
+      routeWhileDragging: false,
+      addWaypoints: false,
+      draggableWaypoints: false,
+      fitSelectedRoutes: true,
+      showAlternatives: false,
+      lineOptions: {
+        styles: [{color: '#0d6efd', opacity: 0.9, weight: 5}]
+      }
+    }).addTo(map);
+
+    routeControl.on('routesfound', function(e) {
+      const route = e.routes && e.routes[0];
+      if (route && route.summary) {
+        const km = (route.summary.totalDistance / 1000).toFixed(1);
+        const mins = Math.round(route.summary.totalTime / 60);
+        setRouteStatus('Route to ' + label + ': ' + km + ' km, about ' + mins + ' min.');
+      } else {
+        setRouteStatus('Route ready to ' + label + '.');
+      }
+      map.closePopup();
+    });
+  }
+
+  function renderRequestRows(requests) {
+    const tbody = document.getElementById('requestTableBody');
+    tbody.innerHTML = '';
+
+    if (!requests.length) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No geocoded requests available.</td></tr>';
+      return;
+    }
+
+    requests.slice(0, 20).forEach(req => {
+      const row = document.createElement('tr');
+      row.innerHTML =
+        '<td>#' + req.id + '</td>' +
+        '<td>' + escapeHtml(req.disaster_type) + '</td>' +
+        '<td>' + escapeHtml(req.urgency) + '</td>' +
+        '<td>' + escapeHtml(req.status) + '</td>' +
+        '<td>' + escapeHtml(truncateWords(req.address, 8)) + '</td>' +
+        '<td>' + req.people_affected + '</td>';
+      tbody.appendChild(row);
+    });
+  }
+
+  function renderMap(payload, preserveView) {
+    requestsLayer.clearLayers();
+    sheltersLayer.clearLayers();
+    alertsLayer.clearLayers();
+    markerRegistry.clear();
+    currentPayload = payload;
+
+    const requestItems = filteredRequests(payload);
+
+    requestItems.forEach(req => {
+      if (req.lat === null || req.lng === null) {
+        return;
+      }
+      const nearest = nearestShelter(req.lat, req.lng, payload.shelters);
+      const marker = L.circleMarker([req.lat, req.lng], {
+        radius: 7,
+        color: requestColor(req),
+        fillColor: requestColor(req),
+        fillOpacity: 0.8,
+        weight: 1
+      }).bindPopup(
+        '<strong>Request #' + req.id + '</strong><br>' +
+        escapeHtml(req.disaster_type) + '<br>' +
+        'Urgency: ' + escapeHtml(req.urgency) + '<br>' +
+        'Status: ' + escapeHtml(req.status) + '<br>' +
+        'Priority score: ' + req.priority_score.toFixed(1) + '<br>' +
+        'People affected: ' + req.people_affected + '<br>' +
+        (nearest ? ('Nearest shelter: ' + escapeHtml(nearest.shelter.name) + ' (' + nearest.distance.toFixed(1) + ' km)<br>') : '') +
+        escapeHtml(truncateWords(req.address, 12)) +
+        buildPopupActions(req.lat, req.lng, 'Request #' + req.id)
+      ).addTo(requestsLayer);
+      registerMarker('request-' + req.id, 'Request #' + req.id + ' ' + req.disaster_type + ' ' + req.address, marker, req);
+    });
+
+    payload.shelters.forEach(shelter => {
+      const marker = L.circleMarker([shelter.lat, shelter.lng], {
+        radius: 7,
+        color: '#28a745',
+        fillColor: '#28a745',
+        fillOpacity: 0.85,
+        weight: 1
+      }).bindPopup(
+        '<strong>' + escapeHtml(shelter.name) + '</strong><br>' +
+        'Capacity: ' + shelter.current_occupancy + '/' + shelter.capacity + '<br>' +
+        escapeHtml(truncateWords(shelter.address, 12)) +
+        buildPopupActions(shelter.lat, shelter.lng, shelter.name)
+      ).addTo(sheltersLayer);
+      registerMarker('shelter-' + shelter.id, shelter.name + ' ' + shelter.address, marker, shelter);
+    });
+
+    payload.active_alerts.forEach(alert => {
+      const marker = L.circleMarker([alert.lat, alert.lng], {
+        radius: 8,
+        color: alertColor(alert),
+        fillColor: alertColor(alert),
+        fillOpacity: 0.9,
+        weight: 2
+      }).bindPopup(
+        '<strong>' + escapeHtml(alert.title) + '</strong><br>' +
+        'Severity: ' + escapeHtml(alert.severity) + '<br>' +
+        escapeHtml(alert.affected_area) +
+        buildPopupActions(alert.lat, alert.lng, alert.title)
+      ).addTo(alertsLayer);
+      registerMarker('alert-' + alert.id, alert.title + ' ' + alert.affected_area, marker, alert);
+    });
+
+    requestItems
+      .filter(req => req.lat === null || req.lng === null)
+      .forEach(async (req) => {
+        const geocoded = await geocodeAddress(req.address);
+        if (!geocoded) {
+          return;
+        }
+        const nearest = nearestShelter(geocoded.lat, geocoded.lng, payload.shelters);
+        const marker = L.circleMarker([geocoded.lat, geocoded.lng], {
+          radius: 7,
+          color: requestColor(req),
+          fillColor: requestColor(req),
+          fillOpacity: 0.55,
+          weight: 1,
+          dashArray: '2,3'
+        }).bindPopup(
+          '<strong>Request #' + req.id + '</strong><br>' +
+          'Estimated by address<br>' +
+          'Urgency: ' + escapeHtml(req.urgency) + '<br>' +
+          'Status: ' + escapeHtml(req.status) + '<br>' +
+          (nearest ? ('Nearest shelter: ' + escapeHtml(nearest.shelter.name) + ' (' + nearest.distance.toFixed(1) + ' km)<br>') : '') +
+          escapeHtml(truncateWords(req.address, 12)) +
+          buildPopupActions(geocoded.lat, geocoded.lng, 'Request #' + req.id + ' (estimated)')
+        ).addTo(requestsLayer);
+        registerMarker('request-estimated-' + req.id, 'Request #' + req.id + ' ' + req.disaster_type + ' ' + req.address, marker, req);
+        updateCoverage(payload);
+        if (!preserveView) {
+          updateBounds();
+        }
+      });
+
+    if (!preserveView) {
+      updateBounds();
+    }
+
+    updateCoverage(payload);
+    renderRequestRows(requestItems);
+  }
+
+  requestsLayer.addTo(map);
+  sheltersLayer.addTo(map);
+  alertsLayer.addTo(map);
+
+  const overlays = {
+    'Crisis Requests': requestsLayer,
+    'Shelters': sheltersLayer,
+    'Active Alerts': alertsLayer
+  };
+  L.control.layers(null, overlays, {collapsed: false}).addTo(map);
+
+  map.on('popupopen', function(event) {
+    const popupNode = event.popup.getElement();
+    if (!popupNode) {
+      return;
+    }
+    popupNode.querySelectorAll('.js-route-btn').forEach(button => {
+      button.onclick = function() {
+        startDirections(parseFloat(button.dataset.lat), parseFloat(button.dataset.lng), button.dataset.label || 'selected point');
+      };
+    });
+    popupNode.querySelectorAll('.js-focus-btn').forEach(button => {
+      button.onclick = function() {
+        focusOnPoint(parseFloat(button.dataset.lat), parseFloat(button.dataset.lng));
+      };
+    });
+    popupNode.querySelectorAll('.js-open-maps-btn').forEach(button => {
+      button.onclick = function() {
+        openExternalDirections(parseFloat(button.dataset.lat), parseFloat(button.dataset.lng));
+      };
+    });
+  });
+
+  function focusMatchingPoint() {
+    const term = (document.getElementById('mapSearchInput').value || '').trim().toLowerCase();
+    if (!term) {
+      return;
+    }
+    for (const entry of markerRegistry.values()) {
+      if (entry.label.toLowerCase().includes(term)) {
+        const latLng = entry.marker.getLatLng();
+        focusOnPoint(latLng.lat, latLng.lng, entry.marker);
+        setRouteStatus('Focused on ' + entry.label + '.');
+        return;
+      }
+    }
+    setRouteStatus('No map point matched "' + term + '".');
+  }
+
+  document.getElementById('locateMeBtn').addEventListener('click', async function() {
+    const loc = await ensureUserLocation();
+    if (loc) {
+      map.setView([loc.lat, loc.lng], 12);
+      setRouteStatus('Using your current location for routing.');
+    }
+  });
+
+  document.getElementById('mapSearchBtn').addEventListener('click', focusMatchingPoint);
+  document.getElementById('mapSearchInput').addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      focusMatchingPoint();
+    }
+  });
+  document.getElementById('clearRouteBtn').addEventListener('click', clearRoute);
+  document.getElementById('fitAllBtn').addEventListener('click', updateBounds);
+  document.getElementById('resetFiltersBtn').addEventListener('click', function() {
+    document.getElementById('urgencyFilter').value = 'all';
+    document.getElementById('statusFilter').value = 'all';
+    renderMap(currentPayload, false);
+    setRouteStatus('Filters reset. Showing all map points.');
+  });
+  document.getElementById('urgencyFilter').addEventListener('change', function() {
+    renderMap(currentPayload, false);
+  });
+  document.getElementById('statusFilter').addEventListener('change', function() {
+    renderMap(currentPayload, false);
+  });
+
+  renderMap(initialPayload, false);
+
+  async function refreshMapData() {
+    if (refreshInFlight) {
+      return;
+    }
+    refreshInFlight = true;
+    try {
+      const response = await fetch('{% url "api-map-data" %}', {credentials: 'same-origin'});
+      if (!response.ok) {
+        refreshInFlight = false;
+        return;
+      }
+      const payload = await response.json();
+      renderMap(payload, true);
+    } catch (e) {
+      // Silent fail to keep map usable even on transient network errors.
+    } finally {
+      refreshInFlight = false;
+    }
+  }
+
+  refreshMapData();
+
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      refreshMapData();
+    }
+  });
+
+  window.addEventListener('focus', function() {
+    refreshMapData();
+  });
+
+  setInterval(refreshMapData, 5000);
+</script>
+{% endblock %}
