@@ -3,8 +3,13 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Django](https://img.shields.io/badge/Django-4.2.8-green.svg)](https://www.djangoproject.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-RakshaNet-success)](https://rakshanet.onrender.com)
 
 **RakshaNet** is an intelligent disaster management and crisis protection platform designed to connect disaster-affected people with NGOs and volunteers for rapid response and resource allocation.
+
+## Live Deployment
+
+- Permanent link: https://rakshanet.onrender.com
 
 ## 🌟 Key Features
 
@@ -67,7 +72,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Visit `http://localhost:8000` to access the application.
+Visit `http://localhost:8000` for local development or https://rakshanet.onrender.com for the live deployment.
 
 ## 📁 Project Structure
 
