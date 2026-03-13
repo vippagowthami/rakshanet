@@ -29,9 +29,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'change-me-in-production')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = (
-    os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,rakshanet.onrender.com').split(',')
     if os.environ.get('ALLOWED_HOSTS')
-    else ['localhost', '127.0.0.1']
+    else ['localhost', '127.0.0.1', 'rakshanet.onrender.com']
 )
 
 if not DEBUG and SECRET_KEY == 'change-me-in-production':
@@ -40,7 +40,7 @@ if not DEBUG and SECRET_KEY == 'change-me-in-production':
 # CSRF Configuration
 CSRF_TRUSTED_ORIGINS = os.environ.get(
     'CSRF_TRUSTED_ORIGINS',
-    'http://localhost:8000,http://127.0.0.1:8000'
+    'http://localhost:8000,http://127.0.0.1:8000,https://rakshanet.onrender.com'
 ).split(',')
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SECURE = (not DEBUG) or (os.environ.get('CSRF_COOKIE_SECURE', 'False') == 'True')
