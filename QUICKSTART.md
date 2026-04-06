@@ -1,5 +1,11 @@
 # RakshaNet - Quick Start Guide
 
+## 🌐 Live Deployment
+
+**Production URL:** https://rakshanet-bfr0.onrender.com
+
+For local development, follow the steps below.
+
 ## 🚀 Quick Setup (5 Minutes)
 
 ### Step 1: Install Dependencies
