@@ -46,17 +46,6 @@
 
             <!-- Statistics Cards -->
             <div class="row mb-4">
-                {% if not user.profile.is_volunteer %}
-                <div class="col-md-4 mb-3">
-                    <div class="card text-center" style="border-left: 4px solid #667eea;">
-                        <div class="card-body">
-                            <h3 class="text-primary" id="donation-count">--</h3>
-                            <p class="text-muted">{% trans "Donations" %}</p>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
                 <div class="col-md-4 mb-3">
                     <div class="card text-center" style="border-left: 4px solid #28a745;">
                         <div class="card-body">
@@ -147,20 +136,6 @@
                     </div>
                 </div>
             </div>
-
-            {% if not user.profile.is_volunteer %}
-            <!-- Donations Section -->
-            <div class="card mb-4">
-                <div class="card-header bg-danger text-white">
-                    <h5 class="mb-0"><i class="fas fa-heart"></i> {% trans "Donation History" %}</h5>
-                </div>
-                <div class="card-body">
-                    <div id="donations-container">
-                        <p class="text-muted text-center py-3">{% trans "Loading donations..." %}</p>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
 
             <!-- Contact & Support History -->
             <div class="card mb-4">
@@ -295,36 +270,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('reviews-container').innerHTML = '<p class="text-muted">Unable to load reviews</p>';
     });
 
-    {% if not user.profile.is_volunteer %}
-    // Load donations
-    fetch(apiBase + 'donations/?page_size=5', { headers: apiHeaders })
-    .then(r => r.json())
-    .then(data => {
-        const donations = Array.isArray(data) ? data : (data.results || []);
-        const donationCount = typeof data.count === 'number' ? data.count : donations.length;
-        document.getElementById('donation-count').textContent = donationCount;
-
-        if (donations.length > 0) {
-            let html = '';
-            donations.slice(0, 5).forEach(donation => {
-                const donor = donation.donor_name || 'User';
-                const type = donation.donation_type || 'donation';
-                const amount = donation.donation_type === 'money'
-                    ? `₹${Number(donation.amount || 0).toFixed(2)}`
-                    : (donation.note || '-');
-                const date = donation.created_at ? new Date(donation.created_at).toLocaleDateString() : '-';
-                html += `<div class="alert alert-info"><strong>${donor}</strong> - ${type}<br><em>${amount}</em><br><small>${date}</small></div>`;
-            });
-            document.getElementById('donations-container').innerHTML = html;
-        } else {
-            document.getElementById('donations-container').innerHTML = '<p class="text-muted">No donations yet</p>';
-        }
-    })
-    .catch(e => {
-        console.error('Error loading donations:', e);
-        document.getElementById('donations-container').innerHTML = '<p class="text-muted">Unable to load donations</p>';
-    });
-    {% endif %}
 });
 </script>
 

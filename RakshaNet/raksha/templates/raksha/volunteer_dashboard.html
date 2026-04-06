@@ -5,7 +5,7 @@
 {% block title %}{% trans "Volunteer Dashboard" %} - RakshaNet{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
+<div>
     {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -20,10 +20,19 @@
     <!-- Page Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <h2 class="text-success">
-                <i class="fas fa-hands-helping"></i> {% trans "Volunteer Dashboard" %}
-            </h2>
-            <p class="text-muted">{% trans "Welcome back" %}, {{ user.get_full_name|default:user.username }}!</p>
+            <div class="dashboard-card p-4">
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                    <div>
+                        <h2 class="text-success mb-2">
+                            <i class="fas fa-hands-helping"></i> {% trans "Volunteer Dashboard" %}
+                        </h2>
+                        <p class="text-muted mb-0">{% trans "Welcome back" %}, {{ user.get_full_name|default:user.username }}!</p>
+                    </div>
+                    <a href="{% url 'community-chat' %}" class="btn btn-info mt-2 mt-md-0">
+                        <i class="fas fa-comments"></i> {% trans "Join Team Coordination Chat" %}
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -188,7 +197,7 @@
                                             <td>
                                                 <a href="{% url 'volunteer-assignment-details' assignment.id %}" 
                                                    class="btn btn-sm btn-info">
-                                                    <i class="fas fa-eye"></i> {% trans "View" %}
+                                                    <i class="fas fa-eye"></i> {% trans "Open Details" %}
                                                 </a>
                                             </td>
                                         </tr>
@@ -244,7 +253,7 @@
                                             <td>
                                                 <a href="{% url 'volunteer-update-assignment' assignment.id %}" 
                                                    class="btn btn-sm btn-primary">
-                                                    <i class="fas fa-edit"></i> {% trans "Update" %}
+                                                    <i class="fas fa-edit"></i> {% trans "Update Progress" %}
                                                 </a>
                                             </td>
                                         </tr>
@@ -306,10 +315,10 @@
                     </div>
 
                     <a href="{% url 'volunteer-profile-setup' %}" class="btn btn-primary btn-block">
-                        <i class="fas fa-edit"></i> {% trans "Edit Profile" %}
+                        <i class="fas fa-edit"></i> {% trans "Update My Profile" %}
                     </a>
                     <a href="{% url 'volunteer-history' %}" class="btn btn-info btn-block">
-                        <i class="fas fa-history"></i> {% trans "View History" %}
+                        <i class="fas fa-history"></i> {% trans "See My Activity History" %}
                     </a>
                 </div>
             </div>

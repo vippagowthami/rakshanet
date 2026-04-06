@@ -185,18 +185,6 @@
                 </div>
             </div>
 
-            <div class="col-md-3 mb-3">
-                <div class="card shadow h-100">
-                    <div class="card-body text-center">
-                        <i class="fas fa-hand-holding-heart fa-3x text-danger mb-3"></i>
-                        <h5 class="card-title">{% trans "Donations" %}</h5>
-                        <p class="card-text text-muted" id="ngoDonationCount">--</p>
-                        <a href="{% url 'donations' %}" class="btn btn-danger btn-sm">
-                            <i class="fas fa-arrow-right"></i> {% trans "View" %}
-                        </a>
-                    </div>
-                </div>
-            </div>
         </div>
 
     {% elif user.profile.is_volunteer %}

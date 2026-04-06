@@ -1,0 +1,75 @@
+{% extends 'raksha/base_raksha_new.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Alerts & Updates" %} - RakshaNet{% endblock %}
+
+{% block content %}
+<div class="row mb-3">
+    <div class="col-12">
+        <div class="dashboard-card p-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between">
+                <div>
+                    <h2 class="mb-1"><i class="fas fa-bell"></i> {% trans "Alerts & Updates" %}</h2>
+                    <p class="mb-0 text-muted">{% trans "Latest notifications related to your requests, assignments, and safety updates." %}</p>
+                </div>
+                <a href="{% url 'raksha-home' %}" class="btn btn-outline-secondary mt-2 mt-md-0">
+                    <i class="fas fa-arrow-left"></i> {% trans "Back to Home" %}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="dashboard-card p-4">
+            {% if notifications %}
+                <div class="list-group list-group-flush">
+                    {% for n in notifications %}
+                        <div class="list-group-item py-3 px-0 border-top-0">
+                            <div class="d-flex flex-wrap justify-content-between align-items-start">
+                                <div class="pr-3" style="min-width: 240px;">
+                                    <div class="mb-1">
+                                        {% if n.notification_type == 'alert' %}
+                                            <span class="badge badge-danger">{% trans "Emergency" %}</span>
+                                        {% elif n.notification_type == 'assignment' %}
+                                            <span class="badge badge-primary">{% trans "Assignment" %}</span>
+                                        {% elif n.notification_type == 'request_update' %}
+                                            <span class="badge badge-info">{% trans "Request Update" %}</span>
+                                        {% elif n.notification_type == 'donation' %}
+                                            <span class="badge badge-success">{% trans "Donation" %}</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">{% trans "System" %}</span>
+                                        {% endif %}
+                                    </div>
+                                    <h5 class="mb-1">{{ n.title }}</h5>
+                                    <p class="mb-1 text-muted">{{ n.message }}</p>
+                                    <small class="text-muted">
+                                        <i class="far fa-clock"></i> {{ n.created_at|date:"M d, Y H:i" }}
+                                    </small>
+                                </div>
+                                <div>
+                                    {% if n.link %}
+                                        <a href="{{ n.link }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-external-link-alt"></i> {% trans "Open" %}
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="far fa-bell-slash fa-3x text-muted mb-3"></i>
+                    <h5>{% trans "No notifications yet" %}</h5>
+                    <p class="text-muted mb-3">{% trans "You are all caught up. New updates will appear here." %}</p>
+                    <a href="{% url 'raksha-home' %}" class="btn btn-primary">
+                        <i class="fas fa-home"></i> {% trans "Go to Home" %}
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

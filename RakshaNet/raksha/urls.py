@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    CrisisRequestViewSet, VolunteerViewSet, DonationViewSet, AssignmentViewSet,
+    CrisisRequestViewSet, VolunteerViewSet, AssignmentViewSet,
     HomePageView, DashboardView, DisasterTypeViewSet, ResourceTypeViewSet, NGOProfileViewSet,
     ShelterViewSet, EmergencyAlertViewSet, ResourceInventoryViewSet,
     NotificationViewSet, FeedbackViewSet, SafetyTipViewSet, EmergencyContactViewSet,
@@ -17,6 +17,7 @@ from .role_views import (
     volunteer_availability_toggle, volunteer_profile_setup, volunteer_assignment_details,
     volunteer_update_assignment, volunteer_history,
     user_dashboard, create_crisis_request, edit_crisis_request, delete_crisis_request,
+    public_crisis_request,
     view_crisis_request, post_crisis_chat_message, user_request_history, submit_feedback,
     community_chat, post_community_message, community_messages_api, ai_chat_assistant,
     geolocation_update, geolocation_services,
@@ -42,7 +43,6 @@ router.register(r'shelters', ShelterViewSet)
 router.register(r'alerts', EmergencyAlertViewSet)
 router.register(r'requests', CrisisRequestViewSet)
 router.register(r'volunteers', VolunteerViewSet)
-router.register(r'donations', DonationViewSet)
 router.register(r'assignments', AssignmentViewSet)
 router.register(r'inventory', ResourceInventoryViewSet)
 router.register(r'notifications', NotificationViewSet)
@@ -104,6 +104,7 @@ urlpatterns = [
     # User/People-specific URLs
     path('user/dashboard/', user_dashboard, name='user-dashboard'),
     path('user/requests/create/', create_crisis_request, name='create-crisis-request'),
+    path('emergency/request/', public_crisis_request, name='public-crisis-request'),
     path('user/requests/<int:request_id>/', view_crisis_request, name='view-crisis-request'),
     path('user/requests/<int:request_id>/chat/', post_crisis_chat_message, name='post-crisis-chat-message'),
     path('user/requests/<int:request_id>/edit/', edit_crisis_request, name='edit-crisis-request'),

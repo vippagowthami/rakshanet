@@ -6,351 +6,795 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "RakshaNet - Disaster Management System" %}</title>
-    
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <!-- Font Awesome -->
+    <title>{% trans "RakshaNet - Emergency Help Platform" %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    
+
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        :root {
+            --bg: #f4f6f9;
+            --panel: #ffffff;
+            --line: #e5eaf1;
+            --text: #0f172a;
+            --muted: #4f5f75;
+            --brand: #0f5bd7;
+            --danger: #c11626;
+            --success: #127b49;
+            --shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+            --radius: 14px;
+        }
+
+        body[data-theme="dark"] {
+            --bg: #070b13;
+            --panel: #131b2a;
+            --line: #263248;
+            --text: #e3eaf6;
+            --muted: #9aabc5;
+            --brand: #75a8ff;
+            --danger: #ff7280;
+            --success: #4ade80;
+            --shadow: 0 14px 34px rgba(0, 0, 0, 0.3);
+        }
+
+        * { box-sizing: border-box; }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            margin: 0;
+            font-family: 'IBM Plex Sans', sans-serif;
+            color: var(--text);
+            background: radial-gradient(46rem 46rem at 88% -6%, rgba(15, 91, 215, 0.16), transparent 60%),
+                        radial-gradient(34rem 34rem at -8% 28%, rgba(193, 22, 38, 0.12), transparent 56%),
+                        var(--bg);
+        }
+
+        .wrap {
+            width: min(1100px, 94vw);
+            margin: 1rem auto 2rem;
+        }
+
+        .nav {
+            position: sticky;
+            top: 10px;
+            z-index: 10;
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            background: color-mix(in srgb, var(--panel) 88%, transparent);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 0.5rem 0.75rem 0.5rem 0.95rem;
+            backdrop-filter: blur(8px);
+            box-shadow: var(--shadow);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            text-decoration: none;
+            color: var(--text);
+            font-family: 'Sora', sans-serif;
+            font-weight: 700;
+        }
+
+        .brand i {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
+            border-radius: 8px;
+            background: linear-gradient(145deg, var(--brand), #13a4dc);
+            color: #fff;
         }
 
-        .navbar-landing {
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        .menu {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
-        .navbar-landing .navbar-brand {
-            color: #667eea !important;
-            font-weight: bold;
-            font-size: 1.5rem;
+        .menu a,
+        .menu button,
+        .menu select {
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--text);
+            border-radius: 999px;
+            min-height: 44px;
+            padding: 0.46rem 0.88rem;
+            text-decoration: none;
+            font-size: 0.88rem;
         }
 
-        .navbar-landing .nav-link {
-            color: #333 !important;
-            margin: 0 10px;
-            transition: all 0.3s;
+        .menu .cta {
+            background: linear-gradient(145deg, var(--danger), #dd2d3b);
+            border-color: transparent;
+            color: #fff;
+            font-weight: 600;
         }
 
-        .navbar-landing .nav-link:hover {
-            color: #667eea !important;
-        }
-
-        .btn-login, .btn-register {
-            margin: 0 5px;
-            border-radius: 25px;
-            padding: 8px 20px;
-        }
-
-        .btn-login {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-        }
-
-        .btn-register {
-            background: white;
-            color: #667eea;
-            border: 2px solid #667eea;
-        }
-
-        .btn-login:hover, .btn-register:hover {
-            transform: scale(1.05);
-        }
-
-        .landing-hero {
-            text-align: center;
-            color: white;
-            animation: fadeIn 0.8s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .hero-icon {
-            font-size: 5rem;
-            margin-bottom: 30px;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .hero-subtitle {
-            font-size: 1.5rem;
-            margin-bottom: 40px;
-            opacity: 0.95;
-        }
-
-        .feature-cards {
+        .hero {
+            margin-top: 1rem;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            margin-top: 50px;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 1rem;
         }
 
-        .feature-card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            transition: all 0.3s;
+        .hero h1 {
+            margin: 0;
+            font-family: 'Sora', sans-serif;
+            line-height: 1.1;
+            font-size: clamp(1.8rem, 4vw, 3.3rem);
         }
 
-        .feature-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        .hero p {
+            color: var(--muted);
+            max-width: 54ch;
         }
 
-        .feature-icon {
-            font-size: 3rem;
-            color: #667eea;
-            margin-bottom: 20px;
+        .hero-actions {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
         }
 
-        .feature-title {
-            font-size: 1.3rem;
-            color: #333;
-            margin-bottom: 10px;
-            font-weight: bold;
+        .btn {
+            min-height: 44px;
+            border-radius: 12px;
+            padding: 0.62rem 1rem;
+            border: 1px solid var(--line);
+            text-decoration: none;
+            color: var(--text);
+            background: var(--panel);
+            font-weight: 600;
         }
 
-        .feature-text {
-            color: #666;
-            font-size: 0.95rem;
+        .btn-primary {
+            background: linear-gradient(145deg, var(--danger), #dd2d3b);
+            border-color: transparent;
+            color: #fff;
         }
 
-        .cta-buttons {
-            margin-top: 40px;
+        .info-card {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 1rem;
+            background: color-mix(in srgb, var(--panel) 92%, transparent);
         }
 
-        .btn-cta {
-            margin: 10px;
-            border-radius: 30px;
-            padding: 12px 40px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            transition: all 0.3s;
+        .section {
+            margin-top: 1rem;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.25rem;
         }
 
-        .btn-cta-primary {
-            background: white;
-            color: #667eea;
-            border: 2px solid white;
+        .section h2 {
+            margin: 0 0 0.75rem;
+            font-family: 'Sora', sans-serif;
+            font-size: 1.35rem;
         }
 
-        .btn-cta-primary:hover {
-            background: #667eea;
-            color: white;
-            transform: scale(1.05);
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0.75rem;
         }
 
-        .info-section {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 40px;
-            margin-top: 60px;
-            color: white;
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
         }
 
-        .info-title {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            font-weight: bold;
+        .card {
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 1rem;
+            background: color-mix(in srgb, var(--panel) 95%, transparent);
         }
 
-        .info-text {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            opacity: 0.95;
+        .card h3 {
+            margin: 0.2rem 0 0.45rem;
+            font-size: 1rem;
+            font-family: 'Sora', sans-serif;
         }
 
-        footer {
-            background: rgba(0, 0, 0, 0.3);
-            color: white;
-            text-align: center;
-            padding: 30px;
-            margin-top: 60px;
+        .muted { color: var(--muted); }
+
+        .proof {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
         }
 
-        .language-selector {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
+        .proof span {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 0.36rem 0.7rem;
+            font-size: 0.85rem;
+            background: color-mix(in srgb, var(--panel) 90%, transparent);
         }
 
-        .language-selector select {
-            border-radius: 20px;
-            padding: 8px 15px;
-            border: none;
-            background: white;
-            color: #667eea;
-            font-weight: bold;
+        .cta-banner {
+            margin-top: 1rem;
+            background: linear-gradient(145deg, #0f5bd7, #1f77e7);
+            color: #fff;
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .cta-banner .btn {
+            border-color: transparent;
+            background: #fff;
+            color: #0f5bd7;
+        }
+
+        .footer {
+            margin-top: 1rem;
+            background: #0f172a;
+            color: #d5deec;
+            border-radius: var(--radius);
+            padding: 1.2rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.8rem;
+        }
+
+        .footer a {
+            color: #d5deec;
+            text-decoration: none;
+            display: block;
+            margin: 0.2rem 0;
+        }
+
+        .contact-line {
+            margin-top: 0.7rem;
+            font-size: 0.9rem;
+            color: #9eb0cb;
+        }
+
+        /* ===== RESPONSIVE BREAKPOINTS ===== */
+        
+        /* EXTRA LARGE SCREENS (1440px+) */
+        @media (min-width: 1440px) {
+            .wrap { width: 1320px; margin: 1.5rem auto 2.5rem; }
+            .nav { padding: 0.75rem 1rem; gap: 1.5rem; }
+            .hero { padding: 3rem; gap: 2rem; }
+            .section { padding: 2rem; gap: 1.25rem; }
+            .grid-3 { gap: 1.25rem; }
+            .footer-grid { gap: 1.5rem; }
+        }
+
+        /* LARGE SCREENS (1025px - 1439px) */
+        @media (min-width: 1025px) {
+            .menu a, .menu button, .menu select {
+                font-size: 0.93rem;
+                padding: 0.5rem 1rem;
+            }
+        }
+
+        /* TABLET & SMALL DESKTOP (769px - 1024px) */
+        @media (max-width: 1024px) {
+            .wrap { width: min(1000px, 95vw); margin: 0.8rem auto 1.5rem; }
+            .nav { padding: 0.5rem 0.6rem; gap: 0.35rem; border-radius: 12px; }
+            .menu a, .menu button, .menu select {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.7rem;
+                min-height: 40px;
+            }
+            .hero {
+                grid-template-columns: 1.2fr 0.8fr;
+                padding: 1.5rem;
+                gap: 1rem;
+            }
+            .hero h1 { font-size: clamp(1.6rem, 3.5vw, 2.8rem); }
+            .section { padding: 1.25rem; }
+            .grid-3 { gap: 0.6rem; }
+            .grid-2 { gap: 0.6rem; }
+            .footer-grid { gap: 0.6rem; }
+            .card { padding: 0.8rem; }
+            .cta-banner { padding: 1rem; }
+        }
+
+        /* MOBILE DEVICES & SMALL TABLETS (481px - 768px) */
+        @media (max-width: 768px) {
+            .wrap { width: min(100%, 96vw); margin: 0.6rem auto 1.2rem; padding: 0 0.5rem; }
+            
+            .nav {
+                position: sticky;
+                top: 5px;
+                padding: 0.4rem 0.5rem;
+                gap: 0.25rem;
+                border-radius: 10px;
+                flex-wrap: wrap;
+            }
+            
+            .brand { gap: 0.4rem; font-size: 0.95rem; }
+            .brand i { width: 26px; height: 26px; }
+            
+            .menu {
+                gap: 0.3rem;
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .menu a,
+            .menu button,
+            .menu select {
+                font-size: 0.75rem;
+                padding: 0.35rem 0.6rem;
+                min-height: 38px;
+                flex: 1;
+                text-align: center;
+                white-space: nowrap;
+            }
+            
+            .menu .cta {
+                flex: 1.2;
+                padding: 0.35rem 0.5rem;
+            }
+            
+            .hero {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+                gap: 0.8rem;
+                margin-top: 0.5rem;
+            }
+            
+            .hero h1 { font-size: clamp(1.4rem, 5vw, 2rem); }
+            .hero p { max-width: 100%; }
+            
+            .hero-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+                margin-top: 0.8rem;
+            }
+            
+            .info-card {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+            
+            .section {
+                padding: 1rem;
+                margin-top: 0.8rem;
+            }
+            
+            .section h2 {
+                font-size: 1.15rem;
+                margin-bottom: 0.6rem;
+            }
+            
+            .grid-3,
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .card {
+                padding: 0.75rem;
+            }
+            
+            .card h3 {
+                font-size: 0.95rem;
+                margin: 0.15rem 0 0.35rem;
+            }
+            
+            .card p,
+            .card i {
+                font-size: 0.85rem;
+            }
+            
+            .proof {
+                gap: 0.4rem;
+            }
+            
+            .proof span {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
+            
+            .btn {
+                padding: 0.55rem 0.9rem;
+                font-size: 0.9rem;
+            }
+            
+            .cta-banner {
+                flex-direction: column;
+                text-align: center;
+                padding: 1rem;
+                gap: 0.8rem;
+                margin-top: 0.8rem;
+            }
+            
+            .cta-banner h2 {
+                font-size: 1.3rem;
+            }
+            
+            .cta-banner .btn {
+                width: 100%;
+            }
+            
+            .footer {
+                padding: 1rem;
+                margin-top: 0.8rem;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 0.8rem;
+            }
+            
+            .footer a {
+                font-size: 0.9rem;
+            }
+            
+            .contact-line {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* SMALL PHONES (320px - 480px) */
+        @media (max-width: 480px) {
+            .wrap { width: 100%; margin: 0.4rem auto 1rem; padding: 0 0.3rem; }
+            
+            .nav {
+                top: 2px;
+                padding: 0.3rem 0.3rem;
+                gap: 0.2rem;
+                border-radius: 8px;
+            }
+            
+            .brand {
+                gap: 0.3rem;
+                font-size: 0.85rem;
+                flex-shrink: 0;
+            }
+            
+            .brand i {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .menu {
+                width: 100%;
+                gap: 0.15rem;
+            }
+            
+            .menu a,
+            .menu button,
+            .menu select {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.5rem;
+                min-height: 36px;
+                flex: 1;
+                padding-left: 0.4rem;
+                padding-right: 0.4rem;
+            }
+            
+            .menu select {
+                padding: 0.3rem 0.25rem;
+            }
+            
+            .hero {
+                padding: 0.8rem;
+                gap: 0.6rem;
+            }
+            
+            .hero h1 {
+                font-size: clamp(1.2rem, 6vw, 1.8rem);
+                line-height: 1.15;
+            }
+            
+            .hero p {
+                font-size: 0.85rem;
+            }
+            
+            .hero-actions {
+                gap: 0.4rem;
+                margin-top: 0.6rem;
+            }
+            
+            .btn {
+                padding: 0.5rem 0.8rem;
+                font-size: 0.8rem;
+                min-height: 40px;
+            }
+            
+            .btn i {
+                margin-right: 0.3rem;
+            }
+            
+            .info-card {
+                padding: 0.6rem;
+                font-size: 0.8rem;
+            }
+            
+            .info-card strong {
+                font-size: 0.9rem;
+            }
+            
+            .section {
+                padding: 0.8rem;
+                margin-top: 0.6rem;
+            }
+            
+            .section h2 {
+                font-size: 1rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .card {
+                padding: 0.6rem;
+            }
+            
+            .card h3 {
+                font-size: 0.9rem;
+                margin: 0.1rem 0 0.3rem;
+            }
+            
+            .card p {
+                font-size: 0.8rem;
+                margin: 0.3rem 0 0;
+            }
+            
+            .card i {
+                font-size: 1.3rem;
+                margin-bottom: 0.3rem;
+            }
+            
+            .proof {
+                gap: 0.3rem;
+                flex-direction: column;
+            }
+            
+            .proof span {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+                width: 100%;
+                text-align: center;
+            }
+            
+            .cta-banner {
+                padding: 0.8rem;
+                gap: 0.6rem;
+                margin-top: 0.6rem;
+            }
+            
+            .cta-banner h2 {
+                font-size: 1.1rem;
+                margin: 0;
+            }
+            
+            .cta-banner p {
+                font-size: 0.8rem;
+            }
+            
+            .cta-banner .btn {
+                width: 100%;
+            }
+            
+            .footer {
+                padding: 0.8rem;
+                margin-top: 0.6rem;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 0.6rem;
+            }
+            
+            .footer strong {
+                font-size: 0.95rem;
+            }
+            
+            .footer a {
+                font-size: 0.8rem;
+            }
+            
+            .contact-line {
+                font-size: 0.75rem;
+                margin-top: 0.4rem;
+            }
+        }
+
+        /* VERY SMALL PHONES (< 320px) - Edge case */
+        @media (max-width: 320px) {
+            .wrap { width: 100%; margin: 0.2rem auto 0.8rem; padding: 0 0.2rem; }
+            .nav { padding: 0.2rem; gap: 0.1rem; }
+            .menu a, .menu button, .menu select { font-size: 0.65rem; padding: 0.25rem 0.4rem; min-height: 34px; }
+            .hero h1 { font-size: clamp(1rem, 7vw, 1.5rem); }
+            .section h2 { font-size: 0.95rem; }
+            .proof span { font-size: 0.7rem; padding: 0.2rem 0.4rem; }
         }
     </style>
 </head>
 <body>
-    <!-- Language Selector -->
-    <div class="language-selector">
-        <form method="post" action="{% url 'set-language' %}" style="display:inline;">
-            {% csrf_token %}
-            <input type="hidden" name="next" value="{{ request.path }}">
-            <select name="language" onchange="this.form.submit()">
-                <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
-                <option value="hi" {% if LANGUAGE_CODE == 'hi' %}selected{% endif %}>हिन्दी</option>
-                <option value="te" {% if LANGUAGE_CODE == 'te' %}selected{% endif %}>తెలుగు</option>
-                <option value="kn" {% if LANGUAGE_CODE == 'kn' %}selected{% endif %}>ಕನ್ನಡ</option>
-                <option value="ta" {% if LANGUAGE_CODE == 'ta' %}selected{% endif %}>தமிழ்</option>
-                <option value="ml" {% if LANGUAGE_CODE == 'ml' %}selected{% endif %}>മലയാളം</option>
-                <option value="bn" {% if LANGUAGE_CODE == 'bn' %}selected{% endif %}>বাংলা</option>
-                <option value="mr" {% if LANGUAGE_CODE == 'mr' %}selected{% endif %}>मराठी</option>
-                <option value="gu" {% if LANGUAGE_CODE == 'gu' %}selected{% endif %}>ગુજરાતી</option>
-                <option value="or" {% if LANGUAGE_CODE == 'or' %}selected{% endif %}>ଓଡ଼ିଆ</option>
-            </select>
-        </form>
-    </div>
+<div class="wrap">
+    <header class="nav">
+        <a class="brand" href="{% url 'landing' %}"><i class="fas fa-shield-alt"></i> RakshaNet</a>
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-landing fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-shield-alt"></i> {% trans "RakshaNet" %}
-            </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="btn btn-login" href="{% url 'login' %}">
-                            <i class="fas fa-sign-in-alt"></i> {% trans "Login" %}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="btn btn-register" href="{% url 'register' %}">
-                            <i class="fas fa-user-plus"></i> {% trans "Register" %}
-                        </a>
-                    </li>
-                </ul>
+        <div class="menu">
+            <a href="#value">Value</a>
+            <a href="#features">Features</a>
+            <a href="#trust">Trust</a>
+            <form method="post" action="{% url 'set-language' %}" data-no-loading="true" style="margin:0;">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <select name="language" onchange="this.form.submit()">
+                    <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>English</option>
+                    <option value="hi" {% if LANGUAGE_CODE == 'hi' %}selected{% endif %}>Hindi</option>
+                    <option value="te" {% if LANGUAGE_CODE == 'te' %}selected{% endif %}>Telugu</option>
+                    <option value="ta" {% if LANGUAGE_CODE == 'ta' %}selected{% endif %}>Tamil</option>
+                </select>
+            </form>
+            <button id="themeToggle" type="button">Theme</button>
+            {% if user.is_authenticated %}
+                <a href="{% url 'raksha-home' %}">{% trans "Dashboard" %}</a>
+                <a href="{% url 'logout' %}">{% trans "Logout" %}</a>
+            {% else %}
+                <a href="{% url 'login' %}">{% trans "Sign In" %}</a>
+                <a href="{% url 'register' %}">{% trans "Register" %}</a>
+            {% endif %}
+            <a class="cta" href="{% url 'public-crisis-request' %}">{% trans "Request Help Now" %}</a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <article>
+            <h1>{% trans "Emergency support in minutes, not after signup." %}</h1>
+            <p>{% trans "RakshaNet helps people request disaster help fast, routes requests to verified responders, and lets everyone track updates clearly." %}</p>
+            <div class="hero-actions">
+                <a class="btn btn-primary" href="{% url 'public-crisis-request' %}"><i class="fas fa-exclamation-triangle"></i> {% trans "Get Emergency Help" %}</a>
+                <a class="btn" href="{% url 'public_emergency_alerts' %}">{% trans "Check Live Alerts" %}</a>
+            </div>
+        </article>
+        <aside class="info-card">
+            <strong>{% trans "What makes this unique" %}</strong>
+            <p class="muted" style="margin:0.45rem 0 0;">{% trans "Unlike generic portals, RakshaNet is built for emergency speed: no-login request intake, role-based responder coordination, and multilingual support for local communities." %}</p>
+        </aside>
+    </section>
+
+    <section id="value" class="section">
+        <h2>{% trans "Value Proposition" %}</h2>
+        <div class="grid-3">
+            <div class="card">
+                <i class="fas fa-bolt" style="color:var(--danger);"></i>
+                <h3>{% trans "Faster First Response" %}</h3>
+                <p class="muted">{% trans "People can request help immediately without account friction." %}</p>
+            </div>
+            <div class="card">
+                <i class="fas fa-route" style="color:var(--brand);"></i>
+                <h3>{% trans "Clear Routing" %}</h3>
+                <p class="muted">{% trans "Requests move to NGOs and volunteers with role-based flow." %}</p>
+            </div>
+            <div class="card">
+                <i class="fas fa-map-marked-alt" style="color:var(--success);"></i>
+                <h3>{% trans "Visible Progress" %}</h3>
+                <p class="muted">{% trans "Status updates, alerts, and shelters in one simple experience." %}</p>
             </div>
         </div>
-    </nav>
+    </section>
 
-    <!-- Hero Section -->
-    <div class="container mt-5" style="padding-top: 60px;">
-        <div class="landing-hero">
-            <div class="hero-icon">
-                <i class="fas fa-shield-alt"></i>
+    <section id="trust" class="section">
+        <h2>{% trans "Social Proof" %}</h2>
+        <div class="proof">
+            <span><i class="fas fa-star"></i> 4.8/5 volunteer feedback</span>
+            <span><i class="fas fa-language"></i> 10 Indian languages supported</span>
+            <span><i class="fas fa-users"></i> NGO + Volunteer + Citizen collaboration</span>
+            <span><i class="fas fa-shield-alt"></i> Emergency-first workflow design</span>
+        </div>
+    </section>
+
+    <section id="features" class="section">
+        <h2>{% trans "Core Features" %}</h2>
+        <div class="grid-2">
+            <div class="card">
+                <h3>{% trans "1) Request Help" %}</h3>
+                <p class="muted">{% trans "Submit location, contact, and urgency in one short form." %}</p>
             </div>
-            <h1 class="hero-title">{% trans "RakshaNet" %}</h1>
-            <p class="hero-subtitle">{% trans "Community Disaster Management & Response Platform" %}</p>
-            
-            <div class="cta-buttons">
-                <a href="{% url 'login' %}" class="btn btn-cta btn-cta-primary">
-                    <i class="fas fa-sign-in-alt"></i> {% trans "Login Now" %}
-                </a>
-                <a href="{% url 'register' %}" class="btn btn-cta btn-cta-primary">
-                    <i class="fas fa-user-plus"></i> {% trans "Get Started" %}
-                </a>
+            <div class="card">
+                <h3>{% trans "2) Responder Coordination" %}</h3>
+                <p class="muted">{% trans "NGOs and volunteers triage, assign, and update actions." %}</p>
+            </div>
+            <div class="card">
+                <h3>{% trans "3) Public Safety Info" %}</h3>
+                <p class="muted">{% trans "Live alerts, shelters, and safety tips for affected areas." %}</p>
+            </div>
+            <div class="card">
+                <h3>{% trans "4) Request Tracking" %}</h3>
+                <p class="muted">{% trans "Users can track request status from submitted to resolved." %}</p>
             </div>
         </div>
+    </section>
 
-        <!-- Feature Cards -->
-        <div class="feature-cards">
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-exclamation-circle"></i>
-                </div>
-                <h3 class="feature-title">{% trans "Report Crisis" %}</h3>
-                <p class="feature-text">{% trans "Quickly report emergency situations and get immediate help from our network of trained volunteers and NGOs." %}</p>
+    <section class="cta-banner">
+        <div>
+            <h2 style="margin:0; font-family:'Sora',sans-serif;">{% trans "Need help right now?" %}</h2>
+            <p style="margin:0.25rem 0 0; opacity:0.9;">{% trans "Submit one emergency request and our response network is alerted." %}</p>
+        </div>
+        <a class="btn" href="{% url 'public-crisis-request' %}">{% trans "Start Emergency Request" %}</a>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-grid">
+            <div>
+                <strong>RakshaNet</strong>
+                <a href="#value">Value</a>
+                <a href="#features">Features</a>
+                <a href="#trust">Trust</a>
             </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-users-cog"></i>
-                </div>
-                <h3 class="feature-title">{% trans "Volunteer Network" %}</h3>
-                <p class="feature-text">{% trans "Join our volunteer community and help save lives during disaster emergencies in your area." %}</p>
+            <div>
+                <strong>{% trans "Safety Links" %}</strong>
+                <a href="{% url 'public_emergency_alerts' %}">{% trans "Live Alerts" %}</a>
+                <a href="{% url 'public_shelters' %}">{% trans "Shelters" %}</a>
+                <a href="{% url 'public_safety_tips' %}">{% trans "Safety Tips" %}</a>
+                <a href="{% url 'emergency_contacts' %}">{% trans "Emergency Contacts" %}</a>
             </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-building"></i>
+            <div>
+                <strong>{% trans "Legal" %}</strong>
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <div class="contact-line">
+                    Vippa Gowthami<br>
+                    vippagowthami@gmail.com<br>
+                    +91 6303930645
                 </div>
-                <h3 class="feature-title">{% trans "NGO Coordination" %}</h3>
-                <p class="feature-text">{% trans "Coordinate disaster response operations, manage resources, and help communities recover faster." %}</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-home"></i>
-                </div>
-                <h3 class="feature-title">{% trans "Emergency Shelters" %}</h3>
-                <p class="feature-text">{% trans "Find nearby shelters during emergencies with real-time availability and contact information." %}</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-lightbulb"></i>
-                </div>
-                <h3 class="feature-title">{% trans "Safety Tips" %}</h3>
-                <p class="feature-text">{% trans "Learn essential safety tips and emergency preparedness guides for various types of disasters." %}</p>
-            </div>
-
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-phone"></i>
-                </div>
-                <h3 class="feature-title">{% trans "Emergency Contacts" %}</h3>
-                <p class="feature-text">{% trans "Access important emergency contacts and support services available in your region." %}</p>
             </div>
         </div>
-
-        <!-- Info Section -->
-        <div class="info-section">
-            <h2 class="info-title">{% trans "About RakshaNet" %}</h2>
-            <p class="info-text">
-                {% trans "RakshaNet is a comprehensive disaster management platform designed to connect people, volunteers, and organizations during emergencies. Our mission is to save lives and reduce suffering through quick coordination and effective resource management." %}
-            </p>
-            <p class="info-text" style="margin-top: 20px;">
-                {% trans "By supporting 10 Indian languages and providing real-time alerts, shelter information, and volunteer coordination, RakshaNet ensures no community is left behind during crisis situations." %}
-            </p>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer>
-        <p>&copy; 2026 {% trans "RakshaNet - Disaster Management System" %}. {% trans "All rights reserved." %}</p>
-        <p style="margin-top: 10px; opacity: 0.8;">
-            {% trans "Working together to save lives and build resilient communities." %}
-        </p>
+        <div class="contact-line">&copy; 2026 RakshaNet. {% trans "Built to reduce response time during disasters." %}</div>
     </footer>
+</div>
 
-    <!-- Scripts -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function() {
+        const key = 'raksha-theme';
+        const root = document.body;
+        const btn = document.getElementById('themeToggle');
+        const saved = localStorage.getItem(key);
+
+        if (saved === 'dark') {
+            root.setAttribute('data-theme', 'dark');
+            btn.textContent = 'Light';
+        }
+
+        btn.addEventListener('click', function() {
+            const dark = root.getAttribute('data-theme') === 'dark';
+            if (dark) {
+                root.removeAttribute('data-theme');
+                localStorage.setItem(key, 'light');
+                btn.textContent = 'Theme';
+            } else {
+                root.setAttribute('data-theme', 'dark');
+                localStorage.setItem(key, 'dark');
+                btn.textContent = 'Light';
+            }
+        });
+    })();
+</script>
 </body>
 </html>

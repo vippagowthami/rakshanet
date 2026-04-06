@@ -140,30 +140,6 @@
                 </table>
             {% endif %}
 
-            {% if donations %}
-                <h5 class="mt-4">{% trans "Donations Received" %}</h5>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>{% trans "Donor" %}</th>
-                            <th>{% trans "Type" %}</th>
-                            <th>{% trans "Amount" %}</th>
-                            <th>{% trans "Date" %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for donation in donations %}
-                        <tr>
-                            <td>{{ donation.donor.username|default:"Anonymous" }}</td>
-                            <td>{{ donation.get_donation_type_display }}</td>
-                            <td>{% if donation.amount %}₹{{ donation.amount }}{% else %}N/A{% endif %}</td>
-                            <td>{{ donation.created_at|date:"M d, Y" }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
-
             <h5 class="mt-4">{% trans "Crisis Coordination Chat" %}</h5>
             <div class="border rounded p-3 mb-3" style="max-height: 280px; overflow-y: auto; background: #fafafa;">
                 {% if chat_messages %}

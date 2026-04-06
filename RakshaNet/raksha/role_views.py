@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Count, Q, Sum, Avg
 from django.utils import timezone
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, Http404
 from django.views.decorators.http import require_POST
 from datetime import timedelta, datetime
 from django.core.paginator import Paginator
@@ -653,27 +653,13 @@ def create_crisis_request(request):
         form = CrisisRequestForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                crisis_request = form.save(commit=False)
-                crisis_request.reporter = request.user
-                
-                # Auto-fill name if not provided
-                if not crisis_request.name:
-                    crisis_request.name = request.user.get_full_name() or request.user.username
-                
-                # Set initial status
-                crisis_request.status = 'submitted'
-                crisis_request.is_verified = False
-                
-                # Save the request
-                crisis_request.save()
-                
+                crisis_request = _save_crisis_request(form, request.user)
                 messages.success(
-                    request, 
+                    request,
                     f'✅ Crisis request #{crisis_request.id} submitted successfully! '
                     f'Our team will review and respond shortly.'
                 )
                 return redirect('user-dashboard')
-                
             except Exception as e:
                 messages.error(request, f'⚠️ Error saving request: {str(e)}. Please try again.')
         else:
@@ -691,8 +677,63 @@ def create_crisis_request(request):
     context = {
         'form': form,
         'disaster_types': DisasterType.objects.all().order_by('name'),
+        'is_public': False,
+        'cancel_url': 'user-dashboard',
     }
     
+    return render(request, 'raksha/create_request.html', context)
+
+
+def _save_crisis_request(form, user=None):
+    """Persist crisis request with consistent defaults for both public and signed-in reporters."""
+    crisis_request = form.save(commit=False)
+
+    if user and user.is_authenticated:
+        crisis_request.reporter = user
+        if not crisis_request.name:
+            crisis_request.name = user.get_full_name() or user.username
+    else:
+        # Keep anonymous request names predictable when caller omits it.
+        if not crisis_request.name:
+            crisis_request.name = 'Anonymous Reporter'
+
+    crisis_request.status = 'submitted'
+    crisis_request.is_verified = False
+    crisis_request.save()
+    return crisis_request
+
+
+def public_crisis_request(request):
+    """Emergency request intake for public users without forcing sign-up."""
+    if request.method == 'POST':
+        form = CrisisRequestForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                reporter = request.user if request.user.is_authenticated else None
+                crisis_request = _save_crisis_request(form, reporter)
+                messages.success(
+                    request,
+                    f'Crisis request #{crisis_request.id} received. Help teams have been notified.'
+                )
+                return redirect('landing')
+            except Exception as e:
+                messages.error(request, f'Error saving request: {str(e)}. Please try again.')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'Error in {field}: {error}')
+    else:
+        initial_data = {}
+        if request.user.is_authenticated:
+            initial_data['name'] = request.user.get_full_name() or request.user.username
+        form = CrisisRequestForm(initial=initial_data)
+
+    context = {
+        'form': form,
+        'disaster_types': DisasterType.objects.all().order_by('name'),
+        'is_public': True,
+        'cancel_url': 'landing',
+    }
     return render(request, 'raksha/create_request.html', context)
 
 
@@ -750,10 +791,11 @@ def view_safety_tips(request):
 @login_required
 def notifications_list(request):
     """List all notifications for user"""
-    notifications = Notification.objects.filter(recipient=request.user).order_by('-created_at')[:50]
-    
-    # Mark as read when viewed
-    notifications.filter(is_read=False).update(is_read=True)
+    base_qs = Notification.objects.filter(recipient=request.user)
+
+    # Mark unread notifications as read before slicing.
+    base_qs.filter(is_read=False).update(is_read=True)
+    notifications = base_qs.order_by('-created_at')[:50]
     
     context = {
         'notifications': notifications,
@@ -2093,158 +2135,26 @@ def resources_view(request):
 
 @login_required
 def donations_view(request):
-    """View for managing and viewing donations"""
-    from .models import Donation, DonationMedia
-    
-    # Filter donations based on user role
-    if request.user.profile.is_ngo_or_admin:
-        try:
-            ngo_profile = request.user.ngo_profile
-            # NGOs see donations for their assigned crisis requests
-            donations = Donation.objects.filter(
-                request__assigned_ngo=ngo_profile
-            ).select_related('donor', 'request').prefetch_related('media').order_by('-created_at')
-        except NGOProfile.DoesNotExist:
-            # If no NGO profile, show all donations (for system admins)
-            messages.info(request, 'No NGO profile found. Showing all donations.')
-            donations = Donation.objects.all().select_related('donor', 'request').prefetch_related('media').order_by('-created_at')
-        except Exception as e:
-            # Handle any other errors
-            messages.error(request, f'Error loading donations: {str(e)}')
-            donations = Donation.objects.all().select_related('donor', 'request').prefetch_related('media').order_by('-created_at')
-    else:
-        # Show user's own donations
-        donations = Donation.objects.filter(donor=request.user).select_related('request').prefetch_related('media').order_by('-created_at')
-    
-    # Get all media uploaded by the user
-    all_media = DonationMedia.objects.filter(uploaded_by=request.user).prefetch_related('donation').order_by('-created_at')
-    
-    # Calculate total donations
-    from django.db.models import Sum
-    total_money = donations.filter(donation_type='money').aggregate(Sum('amount'))['amount__sum'] or 0
-    total_donations = donations.count()
-    
-    context = {
-        'donations': donations,
-        'all_media': all_media,
-        'total_money': total_money,
-        'total_donations': total_donations,
-        'is_ngo': request.user.profile.is_ngo_or_admin,
-    }
-    
-    return render(request, 'raksha/donations.html', context)
+    """Donation module is intentionally disabled for the mini-project variant."""
+    raise Http404('Donation module is disabled in this build.')
 
 
 @login_required
 def create_donation(request):
-    """Create a new donation"""
-    if request.method == 'POST':
-        form = DonationForm(request.POST, request.FILES)
-        if form.is_valid():
-            try:
-                donation = form.save(commit=False)
-                donation.donor = request.user
-                donation.save()
-                
-                messages.success(
-                    request, 
-                    f'✅ Thank you for your generous donation! '
-                    f'Donation #{donation.id} recorded successfully.'
-                )
-                return redirect('donations')
-            except Exception as e:
-                messages.error(request, f'⚠️ Error recording donation: {str(e)}')
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f'Error in {field}: {error}')
-    else:
-        form = DonationForm()
-        
-        # Pre-populate request if provided in URL
-        request_id = request.GET.get('request')
-        if request_id:
-            form.fields['request'].initial = request_id
-    
-    context = {
-        'form': form,
-        'is_create': True
-    }
-    
-    return render(request, 'raksha/donation_form.html', context)
+    """Donation module is intentionally disabled for the mini-project variant."""
+    raise Http404('Donation module is disabled in this build.')
 
 
 @login_required
 def edit_donation(request, donation_id):
-    """Edit an existing donation (owner or NGO can edit)"""
-    donation = get_object_or_404(Donation, id=donation_id)
-    
-    # Check permissions
-    try:
-        profile = request.user.profile
-    except:
-        from users.models import Profile
-        profile = Profile.objects.create(user=request.user, role=3)
-    
-    if donation.donor != request.user and not profile.is_ngo_or_admin:
-        messages.error(request, '⚠️ You do not have permission to edit this donation.')
-        return redirect('donations')
-    
-    if request.method == 'POST':
-        form = DonationForm(request.POST, request.FILES, instance=donation)
-        if form.is_valid():
-            try:
-                form.save()
-                messages.success(request, f'✅ Donation #{donation.id} updated successfully.')
-                return redirect('donations')
-            except Exception as e:
-                messages.error(request, f'⚠️ Error updating donation: {str(e)}')
-        else:
-            for field, errors in form.errors.items():
-                for error in errors:
-                    messages.error(request, f'Error in {field}: {error}')
-    else:
-        form = DonationForm(instance=donation)
-    
-    context = {
-        'form': form,
-        'donation': donation,
-        'is_edit': True
-    }
-    
-    return render(request, 'raksha/donation_form.html', context)
+    """Donation module is intentionally disabled for the mini-project variant."""
+    raise Http404('Donation module is disabled in this build.')
 
 
 @login_required
 def delete_donation(request, donation_id):
-    """Delete a donation (owner or admin can delete)"""
-    donation = get_object_or_404(Donation, id=donation_id)
-    
-    # Check permissions
-    try:
-        profile = request.user.profile
-    except:
-        from users.models import Profile
-        profile = Profile.objects.create(user=request.user, role=3)
-    
-    if donation.donor != request.user and not profile.is_ngo_or_admin:
-        messages.error(request, '⚠️ You do not have permission to delete this donation.')
-        return redirect('donations')
-    
-    if request.method == 'POST':
-        try:
-            donation_id_copy = donation.id
-            donation.delete()
-            messages.success(request, f'✅ Donation #{donation_id_copy} deleted successfully.')
-        except Exception as e:
-            messages.error(request, f'⚠️ Error deleting donation: {str(e)}')
-        return redirect('donations')
-    
-    context = {
-        'donation': donation
-    }
-    
-    return render(request, 'raksha/confirm_delete_donation.html', context)
+    """Donation module is intentionally disabled for the mini-project variant."""
+    raise Http404('Donation module is disabled in this build.')
 
 
 @login_required
@@ -2525,43 +2435,5 @@ def ngo_edit_request(request, request_id):
 
 @login_required
 def upload_donation_media(request):
-    """Upload media (images/videos) for donation documentation"""
-    if request.method == 'POST':
-        media_file = request.FILES.get('media_file')
-        description = request.POST.get('description', '')
-        
-        if not media_file:
-            messages.error(request, 'Please select a file to upload.')
-            return redirect('donations')
-        
-        # Determine media type
-        content_type = media_file.content_type
-        if content_type.startswith('image/'):
-            media_type = 'image'
-        elif content_type.startswith('video/'):
-            media_type = 'video'
-        else:
-            messages.error(request, 'Invalid file type. Please upload an image or video.')
-            return redirect('donations')
-        
-        # Check file size (50MB max)
-        if media_file.size > 50 * 1024 * 1024:
-            messages.error(request, 'File size exceeds 50MB limit.')
-            return redirect('donations')
-        
-        try:
-            from .models import DonationMedia
-            # Create media record
-            media = DonationMedia.objects.create(
-                uploaded_by=request.user,
-                media_type=media_type,
-                file=media_file,
-                description=description
-            )
-            messages.success(request, f'{media_type.title()} uploaded successfully!')
-        except Exception as e:
-            messages.error(request, f'Error uploading file: {str(e)}')
-        
-        return redirect('donations')
-    
-    return redirect('donations')
+    """Donation module is intentionally disabled for the mini-project variant."""
+    raise Http404('Donation module is disabled in this build.')

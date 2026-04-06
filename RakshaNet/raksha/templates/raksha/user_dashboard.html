@@ -5,12 +5,22 @@
 {% block title %}{% trans "User Dashboard" %} - RakshaNet{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
+<div>
+    <div class="row mb-3">
         <div class="col-12">
-            <h2 class="mb-4">
-                <i class="fas fa-tachometer-alt"></i> {% trans "User Dashboard" %}
-            </h2>
+            <div class="dashboard-card p-4">
+                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                    <div>
+                        <h2 class="mb-1 mb-md-0">
+                            <i class="fas fa-tachometer-alt"></i> {% trans "Your Safety Dashboard" %}
+                        </h2>
+                        <small class="text-muted">{% trans "Use this page to request help quickly and track every update." %}</small>
+                    </div>
+                    <a href="{% url 'public-crisis-request' %}" class="btn btn-danger">
+                        <i class="fas fa-exclamation-triangle"></i> {% trans "Need Help Now" %}
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -81,48 +91,38 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-bolt"></i> {% trans "Quick Actions" %}</h5>
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> {% trans "What Do You Need Right Now?" %}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3 mb-3">
                             <a href="{% url 'create-crisis-request' %}" class="btn btn-danger btn-lg btn-block">
-                                <i class="fas fa-plus-circle"></i> {% trans "Report Crisis" %}
+                                <i class="fas fa-plus-circle"></i> {% trans "Request Emergency Help" %}
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
                             <a href="{% url 'user-request-history' %}" class="btn btn-info btn-lg btn-block">
-                                <i class="fas fa-history"></i> {% trans "My Requests" %}
+                                <i class="fas fa-history"></i> {% trans "Track My Requests" %}
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
                             <a href="{% url 'public_emergency_alerts' %}" class="btn btn-warning btn-lg btn-block">
-                                <i class="fas fa-exclamation-triangle"></i> {% trans "Alerts" %}
+                                <i class="fas fa-exclamation-triangle"></i> {% trans "Check Local Alerts" %}
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
                             <a href="{% url 'public_shelters' %}" class="btn btn-success btn-lg btn-block">
-                                <i class="fas fa-home"></i> {% trans "Shelters" %}
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{% url 'create-donation' %}" class="btn btn-outline-primary btn-lg btn-block">
-                                <i class="fas fa-donate"></i> {% trans "Make Donation" %}
-                            </a>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <a href="{% url 'donations' %}" class="btn btn-outline-success btn-lg btn-block">
-                                <i class="fas fa-hand-holding-usd"></i> {% trans "My Donations" %}
+                                <i class="fas fa-home"></i> {% trans "Find Safe Shelter" %}
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
                             <a href="{% url 'submit-feedback' %}" class="btn btn-outline-info btn-lg btn-block">
-                                <i class="fas fa-comment"></i> {% trans "Submit Feedback" %}
+                                <i class="fas fa-comment"></i> {% trans "Share Your Experience" %}
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
                             <a href="{% url 'public_safety_tips' %}" class="btn btn-outline-warning btn-lg btn-block">
-                                <i class="fas fa-lightbulb"></i> {% trans "Safety Tips" %}
+                                <i class="fas fa-lightbulb"></i> {% trans "Read Safety Tips" %}
                             </a>
                         </div>
                     </div>
@@ -224,7 +224,7 @@
                         </div>
                         <div class="text-center mt-3">
                             <a href="{% url 'user-request-history' %}" class="btn btn-primary">
-                                {% trans "View All Requests" %} <i class="fas fa-arrow-right"></i>
+                                {% trans "See Full Request Timeline" %} <i class="fas fa-arrow-right"></i>
                             </a>
                         </div>
                     {% else %}
@@ -232,8 +232,33 @@
                             <i class="fas fa-info-circle fa-2x mb-3"></i>
                             <p class="mb-0">{% trans "You haven't reported any crisis yet." %}</p>
                             <a href="{% url 'create-crisis-request' %}" class="btn btn-primary mt-3">
-                                {% trans "Report Your First Crisis" %}
+                                {% trans "Create Your First Help Request" %}
                             </a>
+                        </div>
+                        <div class="card border-0 shadow-sm mt-3">
+                            <div class="card-body">
+                                <h5 class="mb-3"><i class="fas fa-route"></i> {% trans "Quick Start (3 Steps)" %}</h5>
+                                <div class="row">
+                                    <div class="col-md-4 mb-2">
+                                        <div class="p-3 border rounded h-100">
+                                            <strong>1.</strong> {% trans "Request Emergency Help" %}
+                                            <p class="text-muted mb-0 small">{% trans "Share location, phone, and what support you need." %}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <div class="p-3 border rounded h-100">
+                                            <strong>2.</strong> {% trans "Track Updates" %}
+                                            <p class="text-muted mb-0 small">{% trans "Check status changes and incoming alerts from responders." %}</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-2">
+                                        <div class="p-3 border rounded h-100">
+                                            <strong>3.</strong> {% trans "Stay Connected" %}
+                                            <p class="text-muted mb-0 small">{% trans "Use shelters, safety tips, and support contacts if needed." %}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     {% endif %}
                 </div>
@@ -308,7 +333,7 @@
                             </div>
                         {% endfor %}
                         <a href="{% url 'public_emergency_alerts' %}" class="btn btn-sm btn-warning">
-                            {% trans "View All Alerts" %}
+                            {% trans "See All Alerts" %}
                         </a>
                     {% else %}
                         <p class="text-muted mb-0">{% trans "No active emergency alerts in your area." %}</p>
@@ -335,7 +360,7 @@
                             {% endfor %}
                         </ul>
                         <a href="{% url 'public_shelters' %}" class="btn btn-sm btn-success mt-2">
-                            {% trans "View All Shelters" %}
+                            {% trans "See All Shelters" %}
                         </a>
                     {% else %}
                         <p class="text-muted mb-0">{% trans "No nearby shelters information available." %}</p>
@@ -352,14 +377,14 @@
                 <div class="card-body text-center">
                     <h5><i class="fas fa-question-circle"></i> {% trans "Need Help?" %}</h5>
                     <p class="text-muted">
-                        {% trans "If you're in immediate danger, please call emergency services. For technical support with this app, please contact our support team." %}
+                        {% trans "If you are in immediate danger, call emergency services first. Use app support for technical issues only." %}
                     </p>
                     <div class="btn-group" role="group">
                         <button class="btn btn-danger" onclick="window.location.href='tel:112'">
-                            <i class="fas fa-phone"></i> {% trans "Emergency 112" %}
+                            <i class="fas fa-phone"></i> {% trans "Call Emergency 112" %}
                         </button>
                         <a href="{% url 'contact' %}" class="btn btn-info">
-                            <i class="fas fa-envelope"></i> {% trans "Contact Support" %}
+                            <i class="fas fa-envelope"></i> {% trans "Contact App Support" %}
                         </a>
                     </div>
                 </div>
