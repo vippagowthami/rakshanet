@@ -119,13 +119,23 @@ RakshaNet includes intelligent features powered by rule-based AI:
 
 ## 📚 Documentation
 
-Comprehensive documentation is available in the [docs/](docs/) directory:
+Comprehensive documentation is available:
 
-- [Features Overview](docs/FEATURES.md)
-- [Testing Guide](docs/TESTING_GUIDE.md)
+### Project Guides
+- [Quick Start Guide](QUICKSTART.md) - Get started in 5 minutes
+- [Features Overview](docs/FEATURES.md) - Complete feature list
+- [Testing Guide](docs/TESTING_GUIDE.md) - How to run and write tests
+- [Deployment Guide](docs/DEPLOY.md) - Deployment instructions & options
+- [Deployment Status](DEPLOYMENT_STATUS.md) - Live deployment monitoring & continuous integration
+
+### Change Tracking
+- [**CHANGELOG.md**](CHANGELOG.md) - 📋 Complete history of all changes (Updated after each release)
+- [**CHANGES_TRACKER.md**](CHANGES_TRACKER.md) - 🔄 In-progress features & planned improvements
+
+### Additional Resources
 - [Deployment Checklist](docs/DEPLOYMENT_CHECKLIST.md)
 - [Quick Reference Guide](docs/QUICK_REFERENCE_GUIDE.md)
-- [Deployment Guide](docs/DEPLOY.md)
+- [Literature Review](docs/LITERATURE_REVIEW.md)
 
 ## 🧪 Running Tests
 
@@ -160,6 +170,31 @@ Contributions are welcome! Please follow these steps:
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+### Tracking Your Changes
+
+To keep the project well-documented:
+
+1. **For In-Progress Work:** Update [CHANGES_TRACKER.md](CHANGES_TRACKER.md) with your feature status
+2. **Before Pushing:** Ensure all changes are documented with clear commit messages
+3. **After Merging:** Copy completed entries from CHANGES_TRACKER.md to [CHANGELOG.md](CHANGELOG.md)
+4. **Format:** Use conventional commit messages:
+   - `feat:` for new features
+   - `fix:` for bug fixes
+   - `docs:` for documentation
+   - `refactor:` for code restructuring
+   - `perf:` for performance improvements
+
+**Example:**
+```bash
+git commit -m "feat: Add advanced search filtering for crisis requests
+
+- Implement disaster type filter
+- Add urgency level filter
+- Add location-based search
+- Add database indexes for performance
+- Include unit tests for filter logic"
+```
 
 ## 📄 License
 

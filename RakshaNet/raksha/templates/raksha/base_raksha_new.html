@@ -836,10 +836,15 @@
                     <li><a href="{% url 'ngo-manage-requests' %}"><i class="fas fa-clipboard-list"></i> {% trans "Review Crisis Requests" %}</a></li>
                     <li><a href="{% url 'ngo-volunteers' %}"><i class="fas fa-users"></i> {% trans "Coordinate Volunteers" %}</a></li>
                     <li><a href="{% url 'ngo-inventory' %}"><i class="fas fa-boxes"></i> {% trans "Track Inventory" %}</a></li>
+                    <li style="margin-top: 0.5rem; border-top: 1px solid var(--line); padding-top: 0.5rem;">
+                        <a href="{% url 'ngo-profile' %}"><i class="fas fa-user-cog"></i> {% trans "View/Edit NGO Profile" %}</a>
+                    </li>
                 {% elif user.profile.is_volunteer %}
                     <li><a href="{% url 'volunteer-dashboard' %}"><i class="fas fa-hands-helping"></i> {% trans "My Assignments" %}</a></li>
                     <li><a href="{% url 'volunteer-history' %}"><i class="fas fa-history"></i> {% trans "My Contribution History" %}</a></li>
-                    <li><a href="{% url 'volunteer-profile-setup' %}"><i class="fas fa-user-cog"></i> {% trans "Update Volunteer Profile" %}</a></li>
+                    <li style="margin-top: 0.5rem; border-top: 1px solid var(--line); padding-top: 0.5rem;">
+                        <a href="{% url 'volunteer-profile' %}"><i class="fas fa-user-cog"></i> {% trans "View/Edit Volunteer Profile" %}</a>
+                    </li>
                 {% else %}
                     <li><a href="{% url 'user-dashboard' %}"><i class="fas fa-user"></i> {% trans "My Help Dashboard" %}</a></li>
                     <li><a href="{% url 'create-crisis-request' %}"><i class="fas fa-exclamation-triangle"></i> {% trans "Request Help" %}</a></li>

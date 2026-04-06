@@ -69,8 +69,10 @@ urlpatterns = [
     
     # User Profile
     path('profile/', ProfilePageView.as_view(), name='profile'),
+    
     # NGO-specific URLs
     path('ngo/dashboard/', ngo_dashboard, name='ngo-dashboard'),
+    path('ngo/profile/', ngo_profile_setup, name='ngo-profile'),
     path('ngo/profile-setup/', ngo_profile_setup, name='ngo-profile-setup'),
     path('ngo/verify/<int:request_id>/', ngo_verify_request, name='ngo-verify-request'),
     path('ngo/volunteers/', ngo_manage_volunteers, name='ngo-volunteers'),
@@ -92,8 +94,14 @@ urlpatterns = [
     path('ngo/requests/<int:request_id>/claim/', ngo_claim_request, name='ngo-claim-request'),
     path('ngo/requests/<int:request_id>/edit/', ngo_edit_request, name='ngo-edit-request'),
     
+    # Admin-specific URLs (same functionality as NGO)
+    path('admin/dashboard/', ngo_dashboard, name='admin-dashboard'),
+    path('admin/profile/', ngo_profile_setup, name='admin-profile'),
+    path('admin/profile-setup/', ngo_profile_setup, name='admin-profile-setup'),
+    
     # Volunteer-specific URLs
     path('volunteer/dashboard/', volunteer_dashboard, name='volunteer-dashboard'),
+    path('volunteer/profile/', volunteer_profile_setup, name='volunteer-profile'),
     path('volunteer/profile-setup/', volunteer_profile_setup, name='volunteer-profile-setup'),
     path('volunteer/assignment/<int:assignment_id>/', volunteer_assignment_details, name='volunteer-assignment-details'),
     path('volunteer/assignment/<int:assignment_id>/accept/', volunteer_accept_assignment, name='volunteer-accept-assignment'),
